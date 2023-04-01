@@ -1,18 +1,39 @@
 ﻿@page "/"
+@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Models
 @using Blocktrust.CredentialBuilder.Client.Components
+@inject IAgentService AgentService
+@inject ISnackbar Snackbar
 
 <PageTitle>Blocktrust.CredentialBuilder</PageTitle>
 <MudStack Row="true">
-    <AgentComponent/>
-    <AgentComponent/>
-    <AgentComponent/>
-    <AgentComponent/>
+    @if (AgentService.AgentsInMemory is not null && AgentService.AgentsInMemory.List.Any())
+    {
+        @foreach (var agent in AgentService.AgentsInMemory.List)
+        {
+            <CascadingValue Value="this">
+                <AgentComponent Agent="agent"/>
+            </CascadingValue>
+        }
+    }
+
+    <CascadingValue Value="this">
+        <AgentSetupComponent/>
+    </CascadingValue>
+
 </MudStack>
 
 @code {
 
     protected override async Task OnInitializedAsync()
     {
+        await AgentService.GetAgents();
+    }
+
+
+    public void RefreshState()
+    {
+        this.StateHasChanged();
     }
 
 }

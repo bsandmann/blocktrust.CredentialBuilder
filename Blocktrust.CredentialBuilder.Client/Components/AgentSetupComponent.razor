@@ -1,0 +1,126 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Models
+@using Index = Blocktrust.CredentialBuilder.Client.Pages.Index
+@inject IConnectionService ConnectionService;
+@inject IAgentService AgentService;
+@inject ISnackbar Snackbar
+
+@if (!_showCreateMode)
+{
+    <MudPaper Class="mr-2 mt-4 pa-3" Style="width: 120px">
+        <MudButton Variant="Variant.Filled" OnClick="StartSetup">Create new agent</MudButton>
+    </MudPaper>
+}
+else
+{
+    <MudPaper Class="mr-2 mt-4 pa-3" Style="width: 450px">
+        <MudStack Row="false">
+            <MudText Typo="Typo.h4">Agent setup</MudText>
+            <MudText Typo="Typo.body2">First we have to setup the connection to your <em>PRISM hosted agent</em>. Please provide the instance of the agent as well as the API-Key for that instance.</MudText>
+            <MudAlert Severity="Severity.Info">
+                All data is kept your in browser and is not sent to any server (other than the PRISM agent itself).
+                It is stored in your browser's <strong>local storage</strong> and will automatically reappear when you visit this page again.
+            </MudAlert>
+            <MudDivider></MudDivider>
+            <MudText Typo="Typo.subtitle2">Agent instance</MudText>
+            <MudTextField @bind-Value="AgentInstance" Label="Instance name: eg. abc123" Variant="Variant.Filled"></MudTextField>
+            @if (!string.IsNullOrEmpty(AgentInstance))
+            {
+                <MudText Typo="Typo.caption">We will try to connect to <em>https://@(AgentInstance.ToLowerInvariant().Trim()).atalaprism.io/prism-agent</em></MudText>
+            }
+            <MudText Class="mt-3" Typo="Typo.subtitle2">API key</MudText>
+            <MudTextField @bind-Value="AgentApiKey" Label="API key" Variant="Variant.Filled" InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="ToggleShowApiKey" AdornmentAriaLabel="Show API key"/>
+            <MudText Class="mt-3" Typo="Typo.subtitle2">Agent name (optional)</MudText>
+            <MudTextField @bind-Value="AgentName" Label="Readable name e.g. Issuer" Variant="Variant.Filled"/>
+            <MudStack Row="true">
+                <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="CancelSetup">Cancel</MudButton>
+                <MudSpacer></MudSpacer>
+                <MudButton Disabled="@_isCreating" Variant="Variant.Filled" Color="Color.Success" OnClick="CreateAgent">Continue</MudButton>
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    bool _showCreateMode = false;
+    string? AgentInstance { get; set; }
+    string? AgentApiKey { get; set; }
+    string? AgentName { get; set; }
+    InputType _passwordInput = InputType.Password;
+    string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+    bool _isShowApiKey = false;
+    bool _isCreating = false;
+
+    void ToggleShowApiKey()
+    {
+        @if (_isShowApiKey)
+        {
+            _isShowApiKey = false;
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            _passwordInput = InputType.Password;
+        }
+        else
+        {
+            _isShowApiKey = true;
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+            _passwordInput = InputType.Text;
+        }
+    }
+
+}
+
+@code {
+
+    [CascadingParameter]
+    public Index Parent { get; set; }
+
+    private async Task CreateAgent()
+    {
+        if (string.IsNullOrEmpty(AgentInstance) || string.IsNullOrEmpty(AgentApiKey))
+        {
+            return;
+        }
+        _isCreating = true;
+        var agentResult = AgentService.CreateInMemory(AgentInstance, AgentApiKey, AgentName);
+        if (agentResult.IsFailed)
+        {
+            Snackbar.Add(agentResult.Errors.First().Message, Severity.Error);
+            _isCreating = false;
+            return;
+        }
+
+        var connectionResult = await ConnectionService.GetListOfConnections(agentResult.Value);
+        if (connectionResult.IsFailed)
+        {
+            Snackbar.Add("Could not establish a connection to the provided agent", Severity.Error);
+            _isCreating = false;
+            return;
+        }
+
+        var saveResult = await AgentService.Save(agentResult.Value);
+        if (saveResult.IsFailed)
+        {
+            Snackbar.Add(saveResult.Errors.First().Message, Severity.Error);
+            _isCreating = false;
+            return;
+        }
+
+        _isCreating = false;
+        _showCreateMode = false;
+        AgentInstance = null;
+        AgentApiKey = null;
+        AgentName = null;
+        Parent.RefreshState();
+    }
+
+    private void CancelSetup()
+    {
+        _showCreateMode = false;
+    }
+
+    private void StartSetup()
+    {
+        _showCreateMode = true;
+    }
+
+}

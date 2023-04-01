@@ -1,57 +1,35 @@
-﻿<MudPaper Class="mr-2 mt-4 pa-3" Style="width: 450px">
-    @* <MudStack Row="false"> *@
-    @*     <MudText Typo="Typo.h4">Agent X</MudText> *@
-    @*     <MudDivider></MudDivider> *@
-    @*     <MudText Typo="Typo.caption">Some details on that agent</MudText> *@
-    @* </MudStack> *@
-    <MudStack Row="false">
-        <MudText Typo="Typo.h4">Agent setup</MudText>
-        <MudText Typo="Typo.body2">First we have to setup the connection to your <em>PRISM hosted agent</em>. Please provide the instance of the agent as well as the API-Key for that instance.</MudText>
-        <MudAlert Severity="Severity.Info">
-            All data is kept your in browser and is not sent to any server (other than the PRISM agent itself).
-            It is stored in your browser's <strong>local storage</strong> and will automatically reappear when you visit this page again.
-        </MudAlert>
-        <MudDivider></MudDivider>
-        <MudText Typo="Typo.subtitle2">Agent instance</MudText>
-        <MudTextField @bind-Value="AgentInstance" Label="Instance name: eg. abc123" Variant="Variant.Filled"></MudTextField>
-        @if (!string.IsNullOrEmpty(AgentInstance))
-        {
-            <MudText Typo="Typo.caption">We will try to connect to <em>https://@(AgentInstance.ToLowerInvariant().Trim()).atalaprism.io</em></MudText>
-        }
-        <MudText Class="mt-3" Typo="Typo.subtitle2">API key</MudText>
-        <MudTextField @bind-Value="AgentApiKey" Label="API key" Variant="Variant.Filled" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ToogleShowApiKey" AdornmentAriaLabel="Show API key"/>
-        <MudText Class="mt-3" Typo="Typo.subtitle2">Agent name (optional)</MudText>
-        <MudTextField @bind-Value="AgentName" Label="Readable name e.g. Issuer" Variant="Variant.Filled"/>
+﻿@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Models
+@using Index = Blocktrust.CredentialBuilder.Client.Pages.Index
+@inject IConnectionService ConnectionService;
+@inject IAgentService AgentService;
+@inject IStorageService StorageService;
+@inject ISnackbar Snackbar
+
+<MudPaper Class="mr-2 mt-4 pa-3" Style="width: 450px">
+    <MudStack>
         <MudStack Row="true">
+            <MudText Typo="Typo.h4">@Agent.AgentName </MudText>
             <MudSpacer></MudSpacer>
-            <MudButton Variant="Variant.Filled"  Color="Color.Success">Continue</MudButton>
+            <MudIconButton OnClick="DeleteAgent" Icon="@Icons.Material.Filled.Delete"></MudIconButton>
         </MudStack>
+        <MudText Typo="Typo.body2">@Agent.AgentInstanceUri.AbsoluteUri</MudText>
     </MudStack>
 
 </MudPaper>
 
 @code {
-    string? AgentInstance { get; set; }
-    string? AgentApiKey { get; set; }
-    string? AgentName { get; set; }
-    InputType PasswordInput = InputType.Password;
-    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-    bool isShowApiKey;
 
-    void ToogleShowApiKey()
+    [Parameter]
+    public Agent Agent { get; set; }
+    
+    [CascadingParameter]
+    public Index Parent { get; set; }
+
+    private async Task DeleteAgent()
     {
-        @if (isShowApiKey)
-        {
-            isShowApiKey = false;
-            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-            PasswordInput = InputType.Password;
-        }
-        else
-        {
-            isShowApiKey = true;
-            PasswordInputIcon = Icons.Material.Filled.Visibility;
-            PasswordInput = InputType.Text;
-        }
+        await AgentService.DeleteAgent(Agent);
+        Parent.RefreshState();
     }
 
 }
