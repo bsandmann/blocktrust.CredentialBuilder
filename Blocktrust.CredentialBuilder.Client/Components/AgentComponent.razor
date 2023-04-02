@@ -1,21 +1,22 @@
 ﻿@using Blocktrust.CredentialBuilder.Client.Services
 @using Blocktrust.CredentialBuilder.Client.Models
 @using Index = Blocktrust.CredentialBuilder.Client.Pages.Index
+@using Blocktrust.CredentialBuilder.Client.Components.SubComponents
 @inject IConnectionService ConnectionService;
 @inject IAgentService AgentService;
 @inject IStorageService StorageService;
 @inject ISnackbar Snackbar
 
-<MudPaper Class="mr-2 mt-4 pa-3" Style="width: 450px">
+<MudPaper Class="mr-2 mt-4 pa-3" Style="width: 450px; height: fit-content;">
     <MudStack>
         <MudStack Row="true">
             <MudText Typo="Typo.h4">@Agent.AgentName </MudText>
             <MudSpacer></MudSpacer>
             <MudIconButton OnClick="DeleteAgent" Icon="@Icons.Material.Filled.Delete"></MudIconButton>
         </MudStack>
-        <MudText Typo="Typo.body2">@Agent.AgentInstanceUri.AbsoluteUri</MudText>
+        <MudText Typo="Typo.body2"><em>@Agent.AgentInstanceUri.AbsoluteUri</em></MudText>
+        <Connections Agent="Agent"/>
     </MudStack>
-
 </MudPaper>
 
 @code {

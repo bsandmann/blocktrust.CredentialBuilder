@@ -1,0 +1,26 @@
+﻿@inject IJSRuntime JSRuntime 
+<MudStack Row="true">
+    <span>@StringContent.Substring(0, StringLength)...</span>
+    @if (IncludeCopyIcon)
+    {
+        <MudIconButton Size="Size.Small" @onclick="CopyToClipboard" Icon="@Icons.Material.Filled.ContentCopy" aria-label="delete"></MudIconButton>
+    }
+</MudStack>
+
+@code {
+
+    [Parameter]
+    public string StringContent { get; set; }
+
+    [Parameter]
+    public int StringLength { get; set; } = 10;
+
+    [Parameter]
+    public bool IncludeCopyIcon { get; set; } = false;
+
+    private async Task CopyToClipboard()
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", StringContent);
+    }
+
+}

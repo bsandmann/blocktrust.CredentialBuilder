@@ -7,13 +7,13 @@
 
 @if (!_showCreateMode)
 {
-    <MudPaper Class="mr-2 mt-4 pa-3" Style="width: 120px">
-        <MudButton Variant="Variant.Filled" OnClick="StartSetup">Create new agent</MudButton>
+    <MudPaper Class="mr-2 mt-4 pa-3" Style="height: fit-content;">
+        <MudIconButton Variant="Variant.Filled" OnClick="StartSetup" Icon="@Icons.Material.Filled.Add" Size="Size.Large"></MudIconButton>
     </MudPaper>
 }
 else
 {
-    <MudPaper Class="mr-2 mt-4 pa-3" Style="width: 450px">
+    <MudPaper Class="mr-2 mt-4 pa-3" Style="width: 450px;  height: fit-content;">
         <MudStack Row="false">
             <MudText Typo="Typo.h4">Agent setup</MudText>
             <MudText Typo="Typo.body2">First we have to setup the connection to your <em>PRISM hosted agent</em>. Please provide the instance of the agent as well as the API-Key for that instance.</MudText>
@@ -26,7 +26,14 @@ else
             <MudTextField @bind-Value="AgentInstance" Label="Instance name: eg. abc123" Variant="Variant.Filled"></MudTextField>
             @if (!string.IsNullOrEmpty(AgentInstance))
             {
-                <MudText Typo="Typo.caption">We will try to connect to <em>https://@(AgentInstance.ToLowerInvariant().Trim()).atalaprism.io/prism-agent</em></MudText>
+                if (AgentInstance.Contains("localhost") || AgentInstance.Contains("host.docker.internal"))
+                {
+                    <MudText Typo="Typo.caption">We will try to connect to <em>@(AgentInstance.ToLowerInvariant().Trim())</em></MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption">We will try to connect to <em>https://@(AgentInstance.ToLowerInvariant().Trim()).atalaprism.io/prism-agent</em></MudText>
+                }
             }
             <MudText Class="mt-3" Typo="Typo.subtitle2">API key</MudText>
             <MudTextField @bind-Value="AgentApiKey" Label="API key" Variant="Variant.Filled" InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="ToggleShowApiKey" AdornmentAriaLabel="Show API key"/>
@@ -39,6 +46,8 @@ else
             </MudStack>
         </MudStack>
     </MudPaper>
+    
+    
 }
 
 @code {
@@ -124,3 +133,4 @@ else
     }
 
 }
+
