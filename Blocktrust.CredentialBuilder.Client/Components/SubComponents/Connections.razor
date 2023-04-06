@@ -2,6 +2,7 @@
 @using Blocktrust.CredentialBuilder.Client.Models.Connections
 @using Blocktrust.CredentialBuilder.Client.Components.Helpers
 @using Blocktrust.CredentialBuilder.Client.Services
+@using System.Data.Common
 @inject IConnectionService ConnectionService;
 @inject ISnackbar Snackbar
 
@@ -11,7 +12,9 @@
     {
         <MudStack>
             <MudText Typo="Typo.subtitle2">Create new connection</MudText>
+            <MudTextField Variant="Variant.Filled" T="string" Label="Please name the contact" @bind-Value="CreateOobInvitationLabel"></MudTextField>
             <MudButton Class="my-2" Variant="Variant.Filled" OnClick="CreateOobInvitation" StartIcon="@Icons.Material.Filled.QrCode">Create Out of Band inivation</MudButton>
+            <MudDivider></MudDivider>
             <MudButton Class="my-2" Variant="Variant.Filled" OnClick="ShowAcceptOobInvitation" StartIcon="@Icons.Material.Filled.QrCodeScanner">Accept Out of Band inivation</MudButton>
         </MudStack>
     }
@@ -101,8 +104,35 @@
         <MudStack Class="mt-2">
             <MudStack Row="true">
                 <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.Check"></MudIcon>
-                <MudText Typo="Typo.body2">Connection established (from the perspective of the inviter)</MudText>
+                <MudText Typo="Typo.body2">Connection established<br/> (from the perspective of the inviter)</MudText>
             </MudStack>
+            <div class="ml-9">
+                @if (!string.IsNullOrEmpty(_establishedConnection!.Label))
+                {
+                    <MudStack Row="true">
+                        <MudText Typo="Typo.subtitle2">Label:</MudText>
+                        <MudText Typo="Typo.body2">@_establishedConnection.Label</MudText>
+                    </MudStack>
+                }
+                <MudStack Row="true">
+                    <MudText Typo="Typo.subtitle2">ConnectionId:</MudText>
+                    <MudText Typo="Typo.body2">
+                        <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_establishedConnection.ConnectionId.ToString()"/>
+                    </MudText>
+                </MudStack>
+                <MudStack Row="true">
+                    <MudText Typo="Typo.subtitle2">Local PeerDID:</MudText>
+                    <MudText Typo="Typo.body2">
+                        <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_establishedConnection.LocalPeerDid"/>
+                    </MudText>
+                </MudStack>
+                <MudStack Row="true">
+                    <MudText Typo="Typo.subtitle2">Remote PeerDID:</MudText>
+                    <MudText Typo="Typo.body2">
+                        <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_establishedConnection.RemotePeerDid"/>
+                    </MudText>
+                </MudStack>
+            </div>
         </MudStack>
     }
     else if (_action == EnumConnectionAction.ConnectionResponseReceived)
@@ -110,8 +140,35 @@
         <MudStack Class="mt-2">
             <MudStack Row="true">
                 <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.Check"></MudIcon>
-                <MudText Typo="Typo.body2">Connection established (from the perspective of the invitee)</MudText>
+                <MudText Typo="Typo.body2">Connection established<br/> (from the perspective of the invitee)</MudText>
             </MudStack>
+            <div class="ml-9">
+                @if (!string.IsNullOrEmpty(_establishedConnection!.Label))
+                {
+                    <MudStack Row="true">
+                        <MudText Typo="Typo.subtitle2">Label:</MudText>
+                        <MudText Typo="Typo.body2">@_establishedConnection.Label</MudText>
+                    </MudStack>
+                }
+                <MudStack Row="true">
+                    <MudText Typo="Typo.subtitle2">ConnectionId:</MudText>
+                    <MudText Typo="Typo.body2">
+                        <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_establishedConnection.ConnectionId.ToString()"/>
+                    </MudText>
+                </MudStack>
+                <MudStack Row="true">
+                    <MudText Typo="Typo.subtitle2">Local PeerDID:</MudText>
+                    <MudText Typo="Typo.body2">
+                        <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_establishedConnection.LocalPeerDid"/>
+                    </MudText>
+                </MudStack>
+                <MudStack Row="true">
+                    <MudText Typo="Typo.subtitle2">Remote PeerDID:</MudText>
+                    <MudText Typo="Typo.body2">
+                        <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_establishedConnection.RemotePeerDid"/>
+                    </MudText>
+                </MudStack>
+            </div>
         </MudStack>
     }
     else if (_action == EnumConnectionAction.TimeoutOrFailed)
@@ -131,12 +188,16 @@
     [Parameter]
     public Agent Agent { get; set; }
 
+    string CreateOobInvitationLabel { get; set; }
+
     OobInvitation? OobInvitation { get; set; } = null;
 
     AcceptedInvitation? AcceptedInvitation { get; set; } = null;
-    
+
     CancellationTokenSource _createOobInvitationCancellationTokenSource = new CancellationTokenSource();
     CancellationTokenSource _acceptOobInvitationCancellationTokenSource = new CancellationTokenSource();
+
+    EstablishedConnection? _establishedConnection;
 
     EnumConnectionAction _action = EnumConnectionAction.None;
 
@@ -148,7 +209,7 @@
     // If the inviter gets the expected message, it will also automatically return a response
     private async Task CreateOobInvitation()
     {
-        var oobInvitationResult = await ConnectionService.CreateOobInvitation(Agent, "myLabel");
+        var oobInvitationResult = await ConnectionService.CreateOobInvitation(Agent, CreateOobInvitationLabel);
         if (oobInvitationResult.IsFailed)
         {
             Snackbar.Add(oobInvitationResult.Errors.First().Message, Severity.Error);
@@ -156,15 +217,17 @@
         }
         OobInvitation = oobInvitationResult.Value;
         _action = EnumConnectionAction.InvitationGenerated;
+        _establishedConnection = null;
 
         StateHasChanged();
         _createOobInvitationCancellationTokenSource = new CancellationTokenSource();
         CancellationToken cancellationToken = _createOobInvitationCancellationTokenSource.Token;
         var flowCompleted = await ConnectionService.WaitOobInvitationResponse(Agent, OobInvitation.InvitationId, cancellationToken);
 
-        if (flowCompleted)
+        if (flowCompleted.IsSuccess)
         {
             _action = EnumConnectionAction.ConnectionResponseSent;
+            _establishedConnection = flowCompleted.Value;
         }
         else
         {
@@ -188,6 +251,7 @@
             return;
         }
         _action = EnumConnectionAction.ConnectionRequestSent;
+        _establishedConnection = null;
         AcceptedInvitation = acceptResult.Value;
 
         StateHasChanged();
@@ -195,9 +259,10 @@
         CancellationToken cancellationToken = _acceptOobInvitationCancellationTokenSource.Token;
         var flowCompleted = await ConnectionService.WaitForConnectionConfirmation(Agent, AcceptedInvitation.InvitationId, cancellationToken);
 
-        if (flowCompleted)
+        if (flowCompleted.IsSuccess)
         {
             _action = EnumConnectionAction.ConnectionResponseReceived;
+            _establishedConnection = flowCompleted.Value;
         }
         else
         {
@@ -221,5 +286,6 @@
         _acceptOobInvitationCancellationTokenSource.Cancel();
         _action = EnumConnectionAction.None;
     }
+
 
 }

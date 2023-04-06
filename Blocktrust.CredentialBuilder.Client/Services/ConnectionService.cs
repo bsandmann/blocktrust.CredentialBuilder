@@ -39,8 +39,11 @@ public class ConnectionService : IConnectionService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
+            if (string.IsNullOrEmpty(label))
+            {
+                label = "unnamed connection";
+            }
             var createConnectionResponse = await connectionsManagementApi.CreateConnectionAsync(new CreateConnectionRequest(label));
-            var connectionId = createConnectionResponse.ConnectionId;
             var invitationUrl = createConnectionResponse.Invitation.InvitationUrl;
             var invitationId = createConnectionResponse.Invitation.Id;
             var invitationFrom = createConnectionResponse.Invitation.From;
@@ -53,12 +56,12 @@ public class ConnectionService : IConnectionService
         }
     }
 
-    public async Task<bool> WaitOobInvitationResponse(Agent agent, Guid invitationId, CancellationToken cancellationToken)
+    public async Task<Result<EstablishedConnection>> WaitOobInvitationResponse(Agent agent, Guid invitationId, CancellationToken cancellationToken)
     {
         int attempts = 0;
         var MaxAttempts = 20;
         const int Interval = 5000;
-        var tcs = new TaskCompletionSource<bool>();
+        var tcs = new TaskCompletionSource<Result<EstablishedConnection>>();
         
         cancellationToken.Register(() => tcs.TrySetCanceled());
         
@@ -75,14 +78,16 @@ public class ConnectionService : IConnectionService
             var connection = connections.Value.FirstOrDefault(c => c.Invitation.Id.Equals(invitationId));
             if (connection is not null && connection.State == Connection.StateEnum.ConnectionResponseSent)
             {
-                //TODO we have to extract the peerd did and maybe all other information from the connection
-                //store it in a common model
-                
-                tcs.TrySetResult(true);
+                var label = connection.Label;
+                var localDid = connection.MyDid;
+                var remoteDid = connection.TheirDid;
+                var connectionId = connection.ConnectionId;
+                var establishedConnection = new EstablishedConnection(localDid, remoteDid, invitationId, connectionId, label);
+                tcs.TrySetResult(Result.Ok(establishedConnection));
             }
             else if (attempts >= MaxAttempts)
             {
-                tcs.TrySetResult(false);
+                tcs.TrySetResult(Result.Fail("timeout"));
             }
         }
 
@@ -136,12 +141,12 @@ public class ConnectionService : IConnectionService
         }
     }
     
-    public async Task<bool> WaitForConnectionConfirmation(Agent agent, Guid invitationId, CancellationToken cancellationToken)
+    public async Task<Result<EstablishedConnection>> WaitForConnectionConfirmation(Agent agent, Guid invitationId, CancellationToken cancellationToken)
     {
         int attempts = 0;
         var MaxAttempts = 20;
         const int Interval = 5000;
-        var tcs = new TaskCompletionSource<bool>();
+        var tcs = new TaskCompletionSource<Result<EstablishedConnection>>();
         
         cancellationToken.Register(() => tcs.TrySetCanceled());
         
@@ -158,11 +163,16 @@ public class ConnectionService : IConnectionService
             var connection = connections.Value.FirstOrDefault(c => c.Invitation.Id.Equals(invitationId));
             if (connection is not null && connection.State == Connection.StateEnum.ConnectionResponseReceived)
             {
-                tcs.TrySetResult(true);
+                var label = connection.Label;
+                var localDid = connection.MyDid;
+                var remoteDid = connection.TheirDid;
+                var connectionId = connection.ConnectionId;
+                var establishedConnection = new EstablishedConnection(localDid, remoteDid, invitationId, connectionId, label); 
+                tcs.TrySetResult(Result.Ok(establishedConnection));
             }
             else if (attempts >= MaxAttempts)
             {
-                tcs.TrySetResult(false);
+                tcs.TrySetResult(Result.Fail("timeout"));
             }
         }
 
