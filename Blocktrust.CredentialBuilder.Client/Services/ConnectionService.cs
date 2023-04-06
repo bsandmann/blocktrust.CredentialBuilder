@@ -53,13 +53,15 @@ public class ConnectionService : IConnectionService
         }
     }
 
-    public async Task<bool> WaitOobInvitationResponse(Agent agent, Guid invitationId)
+    public async Task<bool> WaitOobInvitationResponse(Agent agent, Guid invitationId, CancellationToken cancellationToken)
     {
         int attempts = 0;
-        Timer timer = null;
-        var MaxAttempts = 4;
-        const int Interval = 10000;
+        var MaxAttempts = 20;
+        const int Interval = 5000;
         var tcs = new TaskCompletionSource<bool>();
+        
+        cancellationToken.Register(() => tcs.TrySetCanceled());
+        
         Blocktrust.PrismAgentApi.Api.ConnectionsManagementApi connectionsManagementApi = new Blocktrust.PrismAgentApi.Api.ConnectionsManagementApi(
             configuration: new Configuration(defaultHeaders: new Dictionary<string, string>() { { "apiKey", agent.AgentApiKey } },
                 apiKey: new Dictionary<string, string>() { },
@@ -76,12 +78,10 @@ public class ConnectionService : IConnectionService
                 //TODO we have to extract the peerd did and maybe all other information from the connection
                 //store it in a common model
                 
-                await timer.DisposeAsync();
                 tcs.TrySetResult(true);
             }
             else if (attempts >= MaxAttempts)
             {
-                await timer.DisposeAsync();
                 tcs.TrySetResult(false);
             }
         }
@@ -91,10 +91,17 @@ public class ConnectionService : IConnectionService
             // Call the async local function and ignore the returned task.
             _ = OnTimerElapsedAsync(state);
         }
+        
+        using Timer timer = new Timer(OnTimerElapsed, null, 0, Interval);
 
-        timer = new Timer(OnTimerElapsed, null, 0, Interval);
-
-        return await tcs.Task;
+        try
+        {
+            return await tcs.Task;
+        }
+        finally
+        {
+            await timer.DisposeAsync();
+        }
     }
 
 
@@ -129,13 +136,15 @@ public class ConnectionService : IConnectionService
         }
     }
     
-    public async Task<bool> WaitForConnectionConfirmation(Agent agent, Guid invitationId)
+    public async Task<bool> WaitForConnectionConfirmation(Agent agent, Guid invitationId, CancellationToken cancellationToken)
     {
         int attempts = 0;
-        Timer timer = null;
-        var MaxAttempts = 4;
-        const int Interval = 10000;
+        var MaxAttempts = 20;
+        const int Interval = 5000;
         var tcs = new TaskCompletionSource<bool>();
+        
+        cancellationToken.Register(() => tcs.TrySetCanceled());
+        
         Blocktrust.PrismAgentApi.Api.ConnectionsManagementApi connectionsManagementApi = new Blocktrust.PrismAgentApi.Api.ConnectionsManagementApi(
             configuration: new Configuration(defaultHeaders: new Dictionary<string, string>() { { "apiKey", agent.AgentApiKey } },
                 apiKey: new Dictionary<string, string>() { },
@@ -149,12 +158,10 @@ public class ConnectionService : IConnectionService
             var connection = connections.Value.FirstOrDefault(c => c.Invitation.Id.Equals(invitationId));
             if (connection is not null && connection.State == Connection.StateEnum.ConnectionResponseReceived)
             {
-                await timer.DisposeAsync();
                 tcs.TrySetResult(true);
             }
             else if (attempts >= MaxAttempts)
             {
-                await timer.DisposeAsync();
                 tcs.TrySetResult(false);
             }
         }
@@ -164,9 +171,16 @@ public class ConnectionService : IConnectionService
             // Call the async local function and ignore the returned task.
             _ = OnTimerElapsedAsync(state);
         }
+        
+        using Timer timer = new Timer(OnTimerElapsed, null, 0, Interval);
 
-        timer = new Timer(OnTimerElapsed, null, 0, Interval);
-
-        return await tcs.Task;
+        try
+        {
+            return await tcs.Task;
+        }
+        finally
+        {
+            await timer.DisposeAsync();
+        }
     }
 }

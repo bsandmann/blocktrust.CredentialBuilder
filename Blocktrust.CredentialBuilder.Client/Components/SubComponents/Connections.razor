@@ -37,9 +37,13 @@
             </MudStack>
             <MudStack>
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-2"/>
-                <MudText Typo="Typo.body2">
-                    <em>Watiting for connection</em>
-                </MudText>
+                <MudStack Row="true">
+                    <MudButton Variant="Variant.Outlined" OnClick="CancelWaitForOobInvitation" Size="Size.Small">Cancel</MudButton>
+                    <MudSpacer></MudSpacer>
+                    <MudText Typo="Typo.body2">
+                        <em>Waiting for connection</em>
+                    </MudText>
+                </MudStack>
             </MudStack>
         </MudStack>
     }
@@ -82,9 +86,13 @@
             </MudStack>
             <MudStack>
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-2"/>
-                <MudText Typo="Typo.body2">
-                    <em>Watiting for connection confirmation</em>
-                </MudText>
+                <MudStack Row="true">
+                    <MudButton Variant="Variant.Outlined" OnClick="CancelWaitForConfirmation" Size="Size.Small">Cancel</MudButton>
+                    <MudSpacer></MudSpacer>
+                    <MudText Typo="Typo.body2">
+                        <em>Watiting for connection confirmation</em>
+                    </MudText>
+                </MudStack>
             </MudStack>
         </MudStack>
     }
@@ -126,6 +134,9 @@
     OobInvitation? OobInvitation { get; set; } = null;
 
     AcceptedInvitation? AcceptedInvitation { get; set; } = null;
+    
+    CancellationTokenSource _createOobInvitationCancellationTokenSource = new CancellationTokenSource();
+    CancellationTokenSource _acceptOobInvitationCancellationTokenSource = new CancellationTokenSource();
 
     EnumConnectionAction _action = EnumConnectionAction.None;
 
@@ -147,8 +158,9 @@
         _action = EnumConnectionAction.InvitationGenerated;
 
         StateHasChanged();
-
-        var flowCompleted = await ConnectionService.WaitOobInvitationResponse(Agent, OobInvitation.InvitationId);
+        _createOobInvitationCancellationTokenSource = new CancellationTokenSource();
+        CancellationToken cancellationToken = _createOobInvitationCancellationTokenSource.Token;
+        var flowCompleted = await ConnectionService.WaitOobInvitationResponse(Agent, OobInvitation.InvitationId, cancellationToken);
 
         if (flowCompleted)
         {
@@ -179,8 +191,9 @@
         AcceptedInvitation = acceptResult.Value;
 
         StateHasChanged();
-
-        var flowCompleted = await ConnectionService.WaitForConnectionConfirmation(Agent, AcceptedInvitation.InvitationId);
+        _acceptOobInvitationCancellationTokenSource = new CancellationTokenSource();
+        CancellationToken cancellationToken = _acceptOobInvitationCancellationTokenSource.Token;
+        var flowCompleted = await ConnectionService.WaitForConnectionConfirmation(Agent, AcceptedInvitation.InvitationId, cancellationToken);
 
         if (flowCompleted)
         {
@@ -195,6 +208,18 @@
     private void ShowAcceptOobInvitation()
     {
         _action = EnumConnectionAction.ReadyToAcceptInvitation;
+    }
+
+    private void CancelWaitForOobInvitation()
+    {
+        _createOobInvitationCancellationTokenSource.Cancel();
+        _action = EnumConnectionAction.None;
+    }
+
+    private void CancelWaitForConfirmation()
+    {
+        _acceptOobInvitationCancellationTokenSource.Cancel();
+        _action = EnumConnectionAction.None;
     }
 
 }
