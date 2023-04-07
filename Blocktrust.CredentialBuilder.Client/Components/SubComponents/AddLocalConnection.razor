@@ -13,10 +13,10 @@
 {
     <MudStack>
         <MudText Typo="Typo.subtitle2">Create new connection</MudText>
-        <MudTextField Variant="Variant.Filled" T="string" Label="Please name the contact" @bind-Value="CreateOobInvitationLabel"></MudTextField>
-        <MudButton Class="my-2" Variant="Variant.Filled" OnClick="CreateOobInvitation" StartIcon="@Icons.Material.Filled.QrCode">Create Out of Band inivation</MudButton>
+        <MudTextField Variant="Variant.Filled" T="string" Label="Name the connection (optional)" @bind-Value="CreateOobInvitationLabel"></MudTextField>
+        <MudButton Class="my-2" Variant="Variant.Filled" OnClick="CreateOobInvitation" StartIcon="@Icons.Material.Filled.QrCode">Create Out of Band invitation</MudButton>
         <MudDivider></MudDivider>
-        <MudButton Class="my-2" Variant="Variant.Filled" OnClick="ShowAcceptOobInvitation" StartIcon="@Icons.Material.Filled.QrCodeScanner">Accept Out of Band inivation</MudButton>
+        <MudButton Class="my-2" Variant="Variant.Filled" OnClick="ShowAcceptOobInvitation" StartIcon="@Icons.Material.Filled.QrCodeScanner">Accept Out of Band invitation</MudButton>
     </MudStack>
 }
 else if (_action == EnumConnectionAction.InvitationGenerated)
@@ -206,6 +206,7 @@ else if (_action == EnumConnectionAction.ConnectionResponseReceived)
                 </MudText>
             </MudStack>
         </div>
+        <p> TODO: offer a field to name the connection!</p>
         <MudStack Row="true">
             <MudSpacer></MudSpacer>
             <MudButton Variant="Variant.Filled">Continue</MudButton>

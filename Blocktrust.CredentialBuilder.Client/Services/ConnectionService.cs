@@ -9,6 +9,8 @@ using System.Threading;
 
 public class ConnectionService : IConnectionService
 {
+    public static readonly string UnnamedConnectionLabel = "unnamed connection";
+    
     public async Task<Result<List<Connection>>> GetListOfConnections(Agent agent)
     {
         Blocktrust.PrismAgentApi.Api.ConnectionsManagementApi connectionsManagementApi = new Blocktrust.PrismAgentApi.Api.ConnectionsManagementApi(
@@ -39,9 +41,9 @@ public class ConnectionService : IConnectionService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
-            if (string.IsNullOrEmpty(label))
+            if (string.IsNullOrWhiteSpace(label))
             {
-                label = "unnamed connection";
+                label = UnnamedConnectionLabel;
             }
             var createConnectionResponse = await connectionsManagementApi.CreateConnectionAsync(new CreateConnectionRequest(label));
             var invitationUrl = createConnectionResponse.Invitation.InvitationUrl;

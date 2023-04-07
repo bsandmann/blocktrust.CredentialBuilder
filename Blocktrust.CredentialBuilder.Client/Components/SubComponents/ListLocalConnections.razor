@@ -1,8 +1,16 @@
 ﻿@using Blocktrust.CredentialBuilder.Client.Models
+@using Blocktrust.CredentialBuilder.Client.Services
 <MudPaper Class="pa-2">
     @foreach (var connection in Agent.Connections.Connections)
     {
-        <p>@connection.ConnectionId</p>
+        @if (string.IsNullOrWhiteSpace(connection.Label) || connection.Label.Equals(ConnectionService.UnnamedConnectionLabel, StringComparison.InvariantCultureIgnoreCase))
+        {
+            <p>@connection.ConnectionId</p>
+        }
+        else
+        {
+            <p>@connection.Label</p>
+        }
     }
 </MudPaper>
 
@@ -12,3 +20,4 @@
     public Agent Agent { get; set; }
 
 }
+
