@@ -1,0 +1,14 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Models
+<MudPaper Class="pa-2">
+    @foreach (var connection in Agent.Connections.Connections)
+    {
+        <p>@connection.ConnectionId</p>
+    }
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public Agent Agent { get; set; }
+
+}

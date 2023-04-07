@@ -22,7 +22,7 @@ else
                 It is stored in your browser's <strong>local storage</strong> and will automatically reappear when you visit this page again.
             </MudAlert>
             <MudDivider></MudDivider>
-            <MudText Typo="Typo.subtitle2">Agent instance</MudText>
+            <MudText Typo="Typo.body2"><strong>Agent instance</strong></MudText>
             <MudTextField @bind-Value="AgentInstance" Label="Instance name: eg. abc123" Variant="Variant.Filled"></MudTextField>
             @if (!string.IsNullOrEmpty(AgentInstance))
             {
@@ -35,9 +35,9 @@ else
                     <MudText Typo="Typo.caption">We will try to connect to <em>https://@(AgentInstance.ToLowerInvariant().Trim()).atalaprism.io/prism-agent</em></MudText>
                 }
             }
-            <MudText Class="mt-3" Typo="Typo.subtitle2">API key</MudText>
+            <MudText Class="mt-3" Typo="Typo.body2">API key</MudText>
             <MudTextField @bind-Value="AgentApiKey" Label="API key" Variant="Variant.Filled" InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="ToggleShowApiKey" AdornmentAriaLabel="Show API key"/>
-            <MudText Class="mt-3" Typo="Typo.subtitle2">Agent name (optional)</MudText>
+            <MudText Class="mt-3" Typo="Typo.body2"><strong></strong> Agent name (optional)</MudText>
             <MudTextField @bind-Value="AgentName" Label="Readable name e.g. Issuer" Variant="Variant.Filled"/>
             <MudStack Row="true">
                 <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="CancelSetup">Cancel</MudButton>

@@ -1,0 +1,14 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Models
+<MudPaper Class="pa-2">
+    @foreach (var localDid in Agent.LocalDids.Dids)
+    {
+        <p>@localDid.IsPublished : @localDid.Did</p>
+    }
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public Agent Agent { get; set; }
+
+}

@@ -109,10 +109,6 @@ public class AgentService : IAgentService
         {
             AgentsInMemory.List.Add(agent);
         }
-        else
-        {
-            existingAgent = agent;
-        }
 
         var storageResult = await StorageService.SetItem<Agents>(AgentsInMemory);
         if (storageResult.IsFailed)

@@ -14,16 +14,28 @@
             <MudSpacer></MudSpacer>
             <MudIconButton OnClick="DeleteAgent" Icon="@Icons.Material.Filled.Delete"></MudIconButton>
         </MudStack>
-        <MudText Typo="Typo.body2"><em>@Agent.AgentInstanceUri.AbsoluteUri</em></MudText>
-        <Connections Agent="Agent"/>
-    </MudStack>
+        <MudText Typo="Typo.body2">
+            <em>@Agent.AgentInstanceUri.AbsoluteUri</em>
+        </MudText>
+
+
+        <CascadingValue Value="this">
+            <AddLocalConnection Agent="Agent"/>
+        </CascadingValue>
+        <ListLocalConnections Agent="Agent"/>
+
+        <CascadingValue Value="this">
+            <AddLocalDid Agent="Agent"/>
+        </CascadingValue>
+        <ListLocaDids Agent="Agent"/>
+</MudStack>
 </MudPaper>
 
 @code {
 
     [Parameter]
     public Agent Agent { get; set; }
-    
+
     [CascadingParameter]
     public Index Parent { get; set; }
 
@@ -31,6 +43,11 @@
     {
         await AgentService.DeleteAgent(Agent);
         Parent.RefreshState();
+    }
+
+    public void RefreshState()
+    {
+        this.StateHasChanged();
     }
 
 }

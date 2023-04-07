@@ -1,0 +1,176 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Models.Connections
+@using Microsoft.AspNetCore.Components
+@using Blocktrust.CredentialBuilder.Client.Models
+@using Blocktrust.CredentialBuilder.Client.Models.Dids
+@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Components.Helpers
+@using Blocktrust.PrismAgentApi.Model
+@inject IDidService DidService
+@inject ISnackbar Snackbar
+@inject IAgentService AgentService;
+
+<MudPaper Class="pa-2">
+    @if (_action == EnumDidAction.None)
+    {
+        <MudStack>
+            <MudText Typo="Typo.body2">
+                <strong>Create new DID</strong>
+            </MudText>
+            <MudButton Class="my-2" Variant="Variant.Filled" OnClick="CreateUnpublishedDid" StartIcon="@Icons.Material.Filled.PermIdentity">Create new unpublished DID</MudButton>
+        </MudStack>
+    }
+    @if (_action == EnumDidAction.LocalDidCreated)
+    {
+        <MudStack>
+            <MudText Typo="Typo.body2">A new DID has been created, do you want it to use only locally or publish it?</MudText>
+            <MudStack Row="true">
+                <MudText Typo="Typo.body2">
+                    <strong>DID</strong>
+                </MudText>
+                <MudText Typo="Typo.body2">
+                    <Ellipsis StringContent="@_localDid.Did" StringLength="20" IncludeCopyIcon="true"/>
+                </MudText>
+            </MudStack>
+            <MudAlert Severity="Severity.Info">
+                Publishing a DID to a VDR is only required if you want to issue Verifiable Credentials. Otherwise it is recommended to use the DID only locally.
+            </MudAlert>
+            @if (!IsPublishing)
+            {
+                <MudStack Row="true">
+                    <MudButton Variant="Variant.Filled">Local usage</MudButton>
+                    <MudSpacer></MudSpacer>
+                    <MudButton Variant="Variant.Filled" OnClick="PublishDid">Publish</MudButton>
+                </MudStack>
+            }
+            else
+            {
+                <MudStack>
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-2"/>
+                    <MudStack Row="true">
+                        <MudButton Variant="Variant.Outlined" Disabled="true" Size="Size.Small">Cancel</MudButton>
+                        <MudSpacer></MudSpacer>
+                        <MudText Typo="Typo.body2">
+                            <em>
+                                Waiting for publishing
+                            </em>
+                        </MudText>
+                    </MudStack>
+                </MudStack>
+            }
+        </MudStack>
+    }
+    else if (_action == EnumDidAction.Published)
+    {
+        <MudStack Class="mt-2">
+            <MudStack Row="true">
+                <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.Check"></MudIcon>
+                <MudText Typo="Typo.body2">DID published</MudText>
+            </MudStack>
+            <div class="ml-9">
+                <MudStack Row="true">
+                    <MudText Typo="Typo.body2">
+                        <strong>DID</strong>
+                    </MudText>
+                    <MudText Typo="Typo.body2">
+                        <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_localDid.Did"/>
+                    </MudText>
+                </MudStack>
+                <MudStack Row="true">
+                    <MudText Typo="Typo.body2">
+                        <strong>Long-form DID</strong>
+                    </MudText>
+                    <MudText Typo="Typo.body2">
+                        <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_localDid.LongFormDid"/>
+                    </MudText>
+                </MudStack>
+            </div>
+            <MudStack Row="true">
+                <MudIcon Size="Size.Small" Color="Color.Info" Icon="@Icons.Material.Filled.Launch"></MudIcon>
+                <MudLink Typo="Typo.body2" Color="Color.Info" Href="@BlocktrustAnalyticsUrl(_localDid.Did)" Target="_blank">
+                    Resolve DID on Blocktrust Analytics
+                </MudLink>
+            </MudStack>
+            <MudStack Row="true">
+                <MudSpacer></MudSpacer>
+                <MudButton Variant="Variant.Filled">Continue</MudButton>
+            </MudStack>
+        </MudStack>
+    }
+    else if (_action == EnumDidAction.TimeoutOrFailed)
+    {
+        <MudStack Class="mt-2">
+            <MudStack Row="true">
+                <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.Error"></MudIcon>
+                <MudText Typo="Typo.body2">An error occured or it timed out.</MudText>
+            </MudStack>
+        </MudStack>
+    }
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public Agent Agent { get; set; }
+
+    EnumDidAction _action = EnumDidAction.None;
+
+    LocalDid? _localDid;
+
+    bool IsPublishing { get; set; }
+
+    [CascadingParameter]
+    public AgentComponent Parent { get; set; }
+
+
+    private async Task CreateUnpublishedDid()
+    {
+        IsPublishing = false;
+        var createDidResult = await DidService.CreateDid(Agent);
+        if (createDidResult.IsFailed)
+        {
+            Snackbar.Add(createDidResult.Errors.First().Message, Severity.Error);
+            return;
+        }
+        _action = EnumDidAction.LocalDidCreated;
+        _localDid = createDidResult.Value;
+        Agent.AddDid(_localDid);
+        await AgentService.Save(Agent);
+        Parent.RefreshState();
+    }
+
+    private async Task PublishDid()
+    {
+        var publishDidResult = await DidService.PublishDid(Agent, _localDid!);
+        if (publishDidResult.IsFailed)
+        {
+            Snackbar.Add(publishDidResult.Errors.First().Message, Severity.Error);
+            _action = EnumDidAction.TimeoutOrFailed;
+            return;
+        }
+
+        IsPublishing = true;
+        Agent.LocalDids.Dids.Single(p => p.Did.Equals(_localDid.Did)).Published();
+        await AgentService.Save(Agent);
+        StateHasChanged();
+
+        var publishDidStateResult = await DidService.WaitForPublishedDid(Agent, _localDid!, new CancellationToken());
+        if (publishDidStateResult.IsFailed)
+        {
+            Snackbar.Add(publishDidStateResult.Errors.First().Message, Severity.Error);
+            _action = EnumDidAction.TimeoutOrFailed;
+            return;
+        }
+        if (publishDidStateResult.Value == ManagedDID.StatusEnum.PUBLISHED)
+        {
+            _action = EnumDidAction.Published;
+            IsPublishing = false;
+            Parent.RefreshState();
+        }
+    }
+
+    public string BlocktrustAnalyticsUrl(string didPrism)
+    {
+        return String.Concat("https://analytics.blocktrust.dev/resolve/", didPrism);
+    }
+
+}
