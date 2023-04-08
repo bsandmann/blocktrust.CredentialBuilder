@@ -1,0 +1,39 @@
+﻿namespace Blocktrust.CredentialBuilder.Client.Models.Credentials;
+
+using System.Text.Json.Serialization;
+using PrismAgentApi.Model;
+
+public class CreatedCredentialOffer
+{
+    [JsonPropertyName("rId")] public string RecordId { get; set; }
+    [JsonPropertyName("pS")] public IssueCredentialRecord.ProtocolStateEnum ProtocolState { get; set; }
+    [JsonPropertyName("iD")] public string IssuerDid { get; }
+    [JsonPropertyName("sD")] public string SubjectDid { get; set; }
+    [JsonPropertyName("c")] public Dictionary<string, string> Claims { get; }
+    [JsonPropertyName("aI")] public bool AutomaticIssuance { get; }
+    [JsonPropertyName("sI")] public string? SchemaId { get; }
+    [JsonPropertyName("vP")] public decimal? ValidityPeriod { get; }
+    [JsonPropertyName("cUTC")] public DateTime CreatedAt { get; }
+    [JsonPropertyName("jwt")] public string JwtCredential { get; set; }
+
+    [JsonConstructor]
+    public CreatedCredentialOffer()
+    {
+        
+    }
+    
+    public CreatedCredentialOffer(string recordId, IssueCredentialRecord.ProtocolStateEnum protocolState, string issuerDid, string subjectDid, Dictionary<string, string> claims, bool automaticIssuance, string? schemaId, decimal? validityPeriod, DateTime createdAt,
+        string jwtCredential)
+    {
+        RecordId = recordId;
+        ProtocolState = protocolState;
+        IssuerDid = issuerDid;
+        SubjectDid = subjectDid;
+        Claims = claims;
+        AutomaticIssuance = automaticIssuance;
+        SchemaId = schemaId;
+        ValidityPeriod = validityPeriod;
+        CreatedAt = createdAt;
+        JwtCredential = jwtCredential;
+    }
+}

@@ -4,4 +4,6 @@ public enum EnumCredentialAction
 {
     None,
     PreparingClaims,
+    TimeoutOrFailed,
+    AcceptedAndSend
 }

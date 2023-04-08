@@ -10,7 +10,7 @@
 <MudPaper Class="mr-2 mt-4 pa-3" Style="width: 450px; height: fit-content;">
     <MudStack>
         <MudStack Row="true">
-            <MudText Typo="Typo.h4">@Agent.AgentName </MudText>
+            <MudText Typo="Typo.h4">@Agent.AgentName</MudText>
             <MudSpacer></MudSpacer>
             <MudIconButton OnClick="DeleteAgent" Icon="@Icons.Material.Filled.Delete"></MudIconButton>
         </MudStack>
@@ -29,8 +29,12 @@
         </CascadingValue>
         <ListLocaDids Agent="Agent"/>
         
-        <AddCredential Agent="Agent"/> 
-        
+        <CascadingValue Value="this">
+            <AddCredential Agent="Agent"/>
+        </CascadingValue>
+       
+        <ListPendingCredentialOffers Agent="Agent"/>
+
     </MudStack>
 </MudPaper>
 
