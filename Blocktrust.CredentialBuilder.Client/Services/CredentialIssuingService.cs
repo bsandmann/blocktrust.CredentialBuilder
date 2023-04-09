@@ -45,7 +45,7 @@ public class CredentialIssuingService : ICredentialIssuingService
         }
     }
 
-    public async Task<Result<List<CreatedCredentialOffer>>> GetListCredentialOffers(Agent agent, IssueCredentialRecord.ProtocolStateEnum expectedState, TimeSpan? maxLifetime = null)
+    public async Task<Result<List<CreatedCredentialOffer>>> GetListCredentials(Agent agent, IssueCredentialRecord.ProtocolStateEnum expectedState, TimeSpan? timeSpanOfListing = null)
     {
         Blocktrust.PrismAgentApi.Api.IssueCredentialsProtocolApi issueCredentialsProtocolApi = new Blocktrust.PrismAgentApi.Api.IssueCredentialsProtocolApi(
             configuration: new Configuration(defaultHeaders: new Dictionary<string, string>() { { "apiKey", agent.AgentApiKey } },
@@ -58,7 +58,7 @@ public class CredentialIssuingService : ICredentialIssuingService
             //TODO paging!
             var listReceivedCredentialOffers = new List<CreatedCredentialOffer>();
             IEnumerable<IssueCredentialRecord> filteredList;
-            if (maxLifetime is null)
+            if (timeSpanOfListing is null)
             {
                 filteredList = getCredentialRecordsResponse.Contents
                     .Where(p => p.ProtocolState == expectedState)
@@ -67,7 +67,7 @@ public class CredentialIssuingService : ICredentialIssuingService
             else
             {
                 filteredList = getCredentialRecordsResponse.Contents
-                    .Where(p => p.ProtocolState == expectedState && p.CreatedAt > DateTime.UtcNow - maxLifetime)
+                    .Where(p => p.ProtocolState == expectedState && p.CreatedAt > DateTime.UtcNow - timeSpanOfListing)
                     .OrderByDescending(p => p.CreatedAt);
             }
 

@@ -2,6 +2,7 @@
 @using Blocktrust.CredentialBuilder.Client.Models
 @using Index = Blocktrust.CredentialBuilder.Client.Pages.Index
 @using Blocktrust.CredentialBuilder.Client.Components.SubComponents
+@using Blocktrust.PrismAgentApi.Model
 @inject IConnectionService ConnectionService;
 @inject IAgentService AgentService;
 @inject IStorageService StorageService;
@@ -33,7 +34,9 @@
             <AddCredential Agent="Agent"/>
         </CascadingValue>
        
-        <ListPendingCredentialOffers Agent="Agent"/>
+        <ListCredentials Agent="Agent" CredentialType="IssueCredentialRecord.ProtocolStateEnum.OfferReceived" TimeSpanOfListingInMinutes="5"/>
+        
+        <ListCredentials Agent="Agent" CredentialType="IssueCredentialRecord.ProtocolStateEnum.CredentialReceived" TimeSpanOfListingInMinutes="5"/>
 
     </MudStack>
 </MudPaper>

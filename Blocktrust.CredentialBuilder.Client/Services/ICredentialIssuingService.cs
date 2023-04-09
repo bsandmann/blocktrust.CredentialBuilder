@@ -8,7 +8,7 @@ using PrismAgentApi.Model;
 public interface ICredentialIssuingService
 {
     Task<Result<CreatedCredentialOffer>> CreateCredentialOffer(Agent agent, PreparedCredentialOffer preparedCredential);
-    Task<Result<List<CreatedCredentialOffer>>> GetListCredentialOffers(Agent agent,IssueCredentialRecord.ProtocolStateEnum expectedState, TimeSpan? maxLifetime = null);
+    Task<Result<List<CreatedCredentialOffer>>> GetListCredentials(Agent agent,IssueCredentialRecord.ProtocolStateEnum expectedState, TimeSpan? timeSpanOfListing = null);
 
     Task<Result<CreatedCredentialOffer>> WaitForCredentialOfferAcceptance(Agent agent, Guid credentialRecordId, CancellationToken cancellationToken);
 
