@@ -7,8 +7,7 @@
 @inject ISnackbar Snackbar
 @inject IAgentService AgentService;
 
-
-<MudPaper Class="pa-2">
+<div class="pt-5 px-5 pb-3">
 @if (_action == EnumConnectionAction.None)
 {
     <MudStack>
@@ -222,8 +221,7 @@ else if (_action == EnumConnectionAction.TimeoutOrFailed)
         </MudStack>
     </MudStack>
 }
-
-</MudPaper>
+</div>
 
 @code {
 

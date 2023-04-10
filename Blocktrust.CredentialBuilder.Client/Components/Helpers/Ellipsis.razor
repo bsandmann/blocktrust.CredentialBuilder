@@ -1,22 +1,39 @@
 ﻿@inject IJSRuntime JSRuntime 
-<MudStack Row="true">
-    <span>@StringContent.Substring(0, StringLength)...</span>
-    @if (IncludeCopyIcon)
-    {
-        <MudIconButton Size="Size.Small" @onclick="CopyToClipboard" Icon="@Icons.Material.Filled.ContentCopy" aria-label="delete"></MudIconButton>
-    }
-</MudStack>
+@if (IsDid)
+{
+    <MudStack Row="true" Style="background-color: #f2f5f7" Class="rounded pl-2 pr-1 py-0">
+        <span>@StringContent.Substring(0, 16)... @StringContent.Substring(StringContent.Length-6,6)</span>
+        @if (IncludeCopyIcon)
+        {
+            <MudIconButton Style="padding: 0px !important;" Size="Size.Small" @onclick="CopyToClipboard" Icon="@Icons.Material.Filled.ContentCopy" aria-label="delete"></MudIconButton>
+        }
+    </MudStack>
+}
+else
+{
+    <MudStack Row="true">
+        <span>@StringContent.Substring(0, StringLength ?? 10)...</span>
+        @if (IncludeCopyIcon)
+        {
+            <MudIconButton Style="padding: 0px !important;" Size="Size.Small" @onclick="CopyToClipboard" Icon="@Icons.Material.Filled.ContentCopy" aria-label="delete"></MudIconButton>
+        }
+    </MudStack>
+}
 
 @code {
 
     [Parameter]
     public string StringContent { get; set; }
 
+    // Only appplies for non-DIDs
     [Parameter]
-    public int StringLength { get; set; } = 10;
+    public int? StringLength { get; set; } = 10;
 
     [Parameter]
     public bool IncludeCopyIcon { get; set; } = false;
+
+    [Parameter]
+    public bool IsDid { get; set; } = false;
 
     private async Task CopyToClipboard()
     {

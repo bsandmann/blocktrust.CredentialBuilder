@@ -9,7 +9,7 @@
 @inject ISnackbar Snackbar
 @inject IAgentService AgentService;
 
-<MudPaper Class="pa-2">
+<div class="pt-5 px-5 pb-3">
     @if (_action == EnumDidAction.None)
     {
         <MudStack>
@@ -28,7 +28,7 @@
                     <strong>DID</strong>
                 </MudText>
                 <MudText Typo="Typo.body2">
-                    <Ellipsis StringContent="@_localDid.Did" StringLength="20" IncludeCopyIcon="true"/>
+                    <Ellipsis StringContent="@_localDid.Did" IsDid="true" IncludeCopyIcon="true"/>
                 </MudText>
             </MudStack>
             <MudAlert Severity="Severity.Info">
@@ -67,12 +67,12 @@
                 <MudText Typo="Typo.body2">DID published</MudText>
             </MudStack>
             <div class="ml-9">
-                <MudStack Row="true">
+                <MudStack Row="true" Class="mb-2">
                     <MudText Typo="Typo.body2">
                         <strong>DID</strong>
                     </MudText>
                     <MudText Typo="Typo.body2">
-                        <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_localDid.Did"/>
+                        <Ellipsis IsDid="true" IncludeCopyIcon="true" StringContent="@_localDid.Did"/>
                     </MudText>
                 </MudStack>
                 <MudStack Row="true">
@@ -105,7 +105,7 @@
             </MudStack>
         </MudStack>
     }
-</MudPaper>
+</div>
 
 @code {
 

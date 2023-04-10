@@ -17,21 +17,25 @@
     <MudText Typo="Typo.body2">
         <em>@Agent.AgentInstanceUri.AbsoluteUri</em>
     </MudText>
-    <MudExpansionPanels MultiExpansion="true" Class="mt-3">
+    <MudExpansionPanels MultiExpansion="true" Class="mt-3" DisableGutters="true">
         <MudExpansionPanel Text="Connections">
+            <MudDivider/>
             <CascadingValue Value="this">
                 <AddLocalConnection Agent="Agent"/>
             </CascadingValue>
+            <MudDivider/>
             <ListLocalConnections Agent="Agent"/>
         </MudExpansionPanel>
         <MudExpansionPanel Text="DIDs">
+            <MudDivider/>
             <CascadingValue Value="this">
                 <AddLocalDid Agent="Agent"/>
             </CascadingValue>
+            <MudDivider/>
             <ListLocaDids Agent="Agent"/>
         </MudExpansionPanel>
     </MudExpansionPanels>
-    <MudTabs Outlined="true"  Class="mt-3" MinimumTabWidth="141px" Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-1" Centered="true">
+    <MudTabs Outlined="true" Class="mt-3" MinimumTabWidth="141px" Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-1" Centered="true">
         <MudTabPanel Text="Issuer">
             <CascadingValue Value="this">
                 <AddCredential Agent="Agent"/>
@@ -39,6 +43,7 @@
         </MudTabPanel>
         <MudTabPanel Text="Holder">
             <ListCredentials Agent="Agent" CredentialType="IssueCredentialRecord.ProtocolStateEnum.OfferReceived" TimeSpanOfListingInMinutes="5"/>
+            <MudDivider/>
             <ListCredentials Agent="Agent" CredentialType="IssueCredentialRecord.ProtocolStateEnum.CredentialReceived" TimeSpanOfListingInMinutes="5"/>
         </MudTabPanel>
         <MudTabPanel Text="Verifier">
