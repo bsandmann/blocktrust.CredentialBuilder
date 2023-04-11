@@ -61,8 +61,6 @@ public class ConnectionService : IConnectionService
     public async Task<Result<EstablishedConnection>> WaitOobInvitationResponse(Agent agent, Guid invitationId, CancellationToken cancellationToken)
     {
         int attempts = 0;
-        var MaxAttempts = 20;
-        const int Interval = 5000;
         var tcs = new TaskCompletionSource<Result<EstablishedConnection>>();
         
         cancellationToken.Register(() => tcs.TrySetCanceled());
@@ -87,7 +85,7 @@ public class ConnectionService : IConnectionService
                 var establishedConnection = new EstablishedConnection(localDid, remoteDid, invitationId, connectionId, label);
                 tcs.TrySetResult(Result.Ok(establishedConnection));
             }
-            else if (attempts >= MaxAttempts)
+            else if (attempts >= GlobalSettings.MaxAttempts)
             {
                 tcs.TrySetResult(Result.Fail("timeout"));
             }
@@ -99,7 +97,7 @@ public class ConnectionService : IConnectionService
             _ = OnTimerElapsedAsync(state);
         }
         
-        using Timer timer = new Timer(OnTimerElapsed, null, 0, Interval);
+        using Timer timer = new Timer(OnTimerElapsed, null, 0, GlobalSettings.Interval);
 
         try
         {
@@ -146,8 +144,6 @@ public class ConnectionService : IConnectionService
     public async Task<Result<EstablishedConnection>> WaitForConnectionConfirmation(Agent agent, Guid invitationId, CancellationToken cancellationToken)
     {
         int attempts = 0;
-        var MaxAttempts = 20;
-        const int Interval = 5000;
         var tcs = new TaskCompletionSource<Result<EstablishedConnection>>();
         
         cancellationToken.Register(() => tcs.TrySetCanceled());
@@ -172,7 +168,7 @@ public class ConnectionService : IConnectionService
                 var establishedConnection = new EstablishedConnection(localDid, remoteDid, invitationId, connectionId, label); 
                 tcs.TrySetResult(Result.Ok(establishedConnection));
             }
-            else if (attempts >= MaxAttempts)
+            else if (attempts >= GlobalSettings.MaxAttempts)
             {
                 tcs.TrySetResult(Result.Fail("timeout"));
             }
@@ -184,7 +180,7 @@ public class ConnectionService : IConnectionService
             _ = OnTimerElapsedAsync(state);
         }
         
-        using Timer timer = new Timer(OnTimerElapsed, null, 0, Interval);
+        using Timer timer = new Timer(OnTimerElapsed, null, 0, GlobalSettings.Interval);
 
         try
         {

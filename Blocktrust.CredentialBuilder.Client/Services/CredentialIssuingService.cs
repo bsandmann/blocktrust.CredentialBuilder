@@ -98,8 +98,6 @@ public class CredentialIssuingService : ICredentialIssuingService
     public async Task<Result<CreatedCredentialOffer>> WaitForCredentialOfferAcceptance(Agent agent, Guid credentialRecordId, CancellationToken cancellationToken)
     {
         int attempts = 0;
-        var MaxAttempts = 20;
-        const int Interval = 5000;
         var tcs = new TaskCompletionSource<Result<CreatedCredentialOffer>>();
 
         cancellationToken.Register(() => tcs.TrySetCanceled());
@@ -131,7 +129,7 @@ public class CredentialIssuingService : ICredentialIssuingService
                     jwtCredential: credentialRecord.JwtCredential);
                 tcs.TrySetResult(Result.Ok(receivedCredentialOffer));
             }
-            else if (attempts >= MaxAttempts)
+            else if (attempts >= GlobalSettings.MaxAttempts)
             {
                 tcs.TrySetResult(Result.Fail("timeout"));
             }
@@ -143,7 +141,7 @@ public class CredentialIssuingService : ICredentialIssuingService
             _ = OnTimerElapsedAsync(state);
         }
 
-        using Timer timer = new Timer(OnTimerElapsed, null, 0, Interval);
+        using Timer timer = new Timer(OnTimerElapsed, null, 0, GlobalSettings.Interval);
 
         try
         {

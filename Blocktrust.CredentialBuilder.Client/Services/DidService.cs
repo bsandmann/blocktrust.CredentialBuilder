@@ -58,8 +58,6 @@ public class DidService : IDidService
       public async Task<Result<ManagedDID.StatusEnum>> WaitForPublishedDid(Agent agent, LocalDid did, CancellationToken cancellationToken)
     {
         int attempts = 0;
-        var MaxAttempts = 20;
-        const int Interval = 5000;
         var tcs = new TaskCompletionSource<Result<ManagedDID.StatusEnum>>();
         
         cancellationToken.Register(() => tcs.TrySetCanceled());
@@ -78,7 +76,7 @@ public class DidService : IDidService
             {
                 tcs.TrySetResult(Result.Ok(status.Status));
             }
-            else if (attempts >= MaxAttempts)
+            else if (attempts >= GlobalSettings.MaxAttempts)
             {
                 tcs.TrySetResult(Result.Fail("timeout"));
             }
@@ -90,7 +88,7 @@ public class DidService : IDidService
             _ = OnTimerElapsedAsync(state);
         }
         
-        using Timer timer = new Timer(OnTimerElapsed, null, 0, Interval);
+        using Timer timer = new Timer(OnTimerElapsed, null, 0, GlobalSettings.Interval);
 
         try
         {
