@@ -208,7 +208,7 @@ else if (_action == EnumConnectionAction.ConnectionResponseReceived)
         <p> TODO: offer a field to name the connection!</p>
         <MudStack Row="true">
             <MudSpacer></MudSpacer>
-            <MudButton Variant="Variant.Filled">Continue</MudButton>
+            <MudButton @onclick="Reset" Variant="Variant.Filled">Continue</MudButton>
         </MudStack>
     </MudStack>
 }
@@ -337,5 +337,17 @@ else if (_action == EnumConnectionAction.TimeoutOrFailed)
         _action = EnumConnectionAction.None;
     }
 
+
+    private void Reset()
+    {
+        CreateOobInvitationLabel = string.Empty;
+        OobInvitation = null;
+        AcceptedInvitation = null;
+        CancellationTokenSource _createOobInvitationCancellationTokenSource = new CancellationTokenSource();
+        CancellationTokenSource _acceptOobInvitationCancellationTokenSource = new CancellationTokenSource();
+        _establishedConnection = null;
+        _action = EnumConnectionAction.None;
+        string? InvitationLink = null;
+    }
 
 }

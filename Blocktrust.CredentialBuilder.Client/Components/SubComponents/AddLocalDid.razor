@@ -37,7 +37,7 @@
             @if (!IsPublishing)
             {
                 <MudStack Row="true">
-                    <MudButton Variant="Variant.Filled">Local usage</MudButton>
+                    <MudButton OnClick="Reset" Variant="Variant.Filled">Local usage</MudButton>
                     <MudSpacer></MudSpacer>
                     <MudButton Variant="Variant.Filled" OnClick="PublishDid">Publish</MudButton>
                 </MudStack>
@@ -92,7 +92,7 @@
             </MudStack>
             <MudStack Row="true">
                 <MudSpacer></MudSpacer>
-                <MudButton Variant="Variant.Filled">Continue</MudButton>
+                <MudButton OnClick="Reset" Variant="Variant.Filled">Continue</MudButton>
             </MudStack>
         </MudStack>
     }
@@ -171,6 +171,14 @@
     public string BlocktrustAnalyticsUrl(string didPrism)
     {
         return String.Concat("https://analytics.blocktrust.dev/resolve/", didPrism);
+    }
+
+    private void Reset()
+    {
+        _action = EnumDidAction.None;
+        _localDid = null;
+        IsPublishing = false;
+
     }
 
 }
