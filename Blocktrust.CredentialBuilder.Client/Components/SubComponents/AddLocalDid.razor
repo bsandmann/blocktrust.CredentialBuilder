@@ -31,6 +31,14 @@
                     <Ellipsis StringContent="@_localDid.Did" IsDid="true" IncludeCopyIcon="true"/>
                 </MudText>
             </MudStack>
+            <MudStack Row="true">
+                <MudText Typo="Typo.body2">
+                    <strong>Long-form DID</strong>
+                </MudText>
+                <MudText Typo="Typo.body2">
+                    <Ellipsis StringLength="20" IncludeCopyIcon="true" StringContent="@_localDid.LongFormDid"/>
+                </MudText>
+            </MudStack>
             <MudAlert Severity="Severity.Info">
                 Publishing a DID to a VDR is only required if you want to issue Verifiable Credentials. Otherwise it is recommended to use the DID only locally.
             </MudAlert>
@@ -178,7 +186,6 @@
         _action = EnumDidAction.None;
         _localDid = null;
         IsPublishing = false;
-
     }
 
 }

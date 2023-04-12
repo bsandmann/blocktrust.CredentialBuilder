@@ -169,8 +169,12 @@ public class CredentialIssuingService : ICredentialIssuingService
             }
 
             //TODO BUG IN PRISM!
-            createdCredentialOffer.SubjectDid = "did:prism:f32491bb9743a79d69018fa66cb34901687253759e701a3cf57f3fce74bf54cb";
-            
+            if (string.IsNullOrEmpty(createdCredentialOffer.SubjectDid))
+            {
+                createdCredentialOffer.SubjectDid = agent.LocalDids.Dids.FirstOrDefault(p => !p.IsPublished)?.Did ??
+                                                    "did:prism:ab205c990a7600e7b3cf4215ea1f3cd09574021d53fc309d288bebce96569554";
+            }
+
             var acceptCredentialOfferAsync = await issueCredentialsProtocolApi.AcceptCredentialOfferAsync(recordId, new AcceptCredentialOfferRequest(createdCredentialOffer.SubjectDid));
             var createdCredential = new CreatedCredentialOffer(
                 recordId: acceptCredentialOfferAsync.RecordId,
