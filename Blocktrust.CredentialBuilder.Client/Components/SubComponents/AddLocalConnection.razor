@@ -159,7 +159,7 @@ else if (_action == EnumConnectionAction.ConnectionResponseSent)
         </div>
         <MudStack Row="true">
             <MudSpacer></MudSpacer>
-            <MudButton Variant="Variant.Filled">Continue</MudButton>
+            <MudButton OnClick="Reset" Variant="Variant.Filled">Continue</MudButton>
         </MudStack>
     </MudStack>
 }
@@ -208,7 +208,7 @@ else if (_action == EnumConnectionAction.ConnectionResponseReceived)
         <p> TODO: offer a field to name the connection!</p>
         <MudStack Row="true">
             <MudSpacer></MudSpacer>
-            <MudButton @onclick="Reset" Variant="Variant.Filled">Continue</MudButton>
+            <MudButton OnClick="Reset" Variant="Variant.Filled">Continue</MudButton>
         </MudStack>
     </MudStack>
 }
