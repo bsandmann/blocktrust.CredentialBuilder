@@ -3,6 +3,7 @@
 using FluentResults;
 using Models;
 using Models.Credentials;
+using Models.Dids;
 using PrismAgentApi.Model;
 
 public interface ICredentialIssuingService
@@ -12,5 +13,5 @@ public interface ICredentialIssuingService
 
     Task<Result<CreatedCredentialOffer>> WaitForCredentialOfferAcceptance(Agent agent, Guid credentialRecordId, CancellationToken cancellationToken);
 
-    Task<Result<CreatedCredentialOffer>> AcceptCredentialOffer(Agent agent, CreatedCredentialOffer createdCredentialOffer);
+    Task<Result<CreatedCredentialOffer>> AcceptCredentialOffer(Agent agent, CreatedCredentialOffer createdCredentialOffer, LocalDid subjectDid);
 }

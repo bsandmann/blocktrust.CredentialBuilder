@@ -22,7 +22,7 @@ public class CreatedCredentialOffer
         
     }
     
-    public CreatedCredentialOffer(string recordId, IssueCredentialRecord.ProtocolStateEnum protocolState, string issuerDid, string subjectDid, Dictionary<string, string> claims, bool automaticIssuance, string? schemaId, decimal? validityPeriod, DateTime createdAt,
+    public CreatedCredentialOffer(string recordId, IssueCredentialRecord.ProtocolStateEnum protocolState, string issuerDid, string? subjectDid, Dictionary<string, string> claims, bool automaticIssuance, string? schemaId, decimal? validityPeriod, DateTime createdAt,
         string jwtCredential)
     {
         RecordId = recordId;

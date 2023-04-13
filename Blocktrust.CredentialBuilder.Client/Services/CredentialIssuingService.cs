@@ -3,6 +3,7 @@
 using FluentResults;
 using Models;
 using Models.Credentials;
+using Models.Dids;
 using PrismAgentApi.Client;
 using PrismAgentApi.Model;
 
@@ -20,7 +21,6 @@ public class CredentialIssuingService : ICredentialIssuingService
             var createCredentialOfferResponse = await issueCredentialsProtocolApi.CreateCredentialOfferAsync(
                 new CreateIssueCredentialRecordRequest(
                     schemaId: preparedCredential.SchemaId,
-                    subjectId: preparedCredential.SubjectDid,
                     validityPeriod: 0M,
                     claims: preparedCredential.Claims,
                     automaticIssuance: preparedCredential.AutomaticIssuance,
@@ -30,7 +30,7 @@ public class CredentialIssuingService : ICredentialIssuingService
                 recordId: createCredentialOfferResponse.RecordId,
                 protocolState: createCredentialOfferResponse.ProtocolState,
                 issuerDid: preparedCredential.IssuerDid.Did, // ATTENTION: This value currently comes from the prepared credential, but it should come from the response (I believe)
-                subjectDid: preparedCredential.SubjectDid, // ATTENTION: This value currently comes from the prepared credential, but it should come from the response (I believe)
+                subjectDid: null,
                 claims: createCredentialOfferResponse.Claims,
                 automaticIssuance: createCredentialOfferResponse.AutomaticIssuance,
                 schemaId: createCredentialOfferResponse.SchemaId,
@@ -153,7 +153,7 @@ public class CredentialIssuingService : ICredentialIssuingService
         }
     }
 
-    public async Task<Result<CreatedCredentialOffer>> AcceptCredentialOffer(Agent agent, CreatedCredentialOffer createdCredentialOffer)
+    public async Task<Result<CreatedCredentialOffer>> AcceptCredentialOffer(Agent agent, CreatedCredentialOffer createdCredentialOffer, LocalDid subjectDid)
     {
         Blocktrust.PrismAgentApi.Api.IssueCredentialsProtocolApi issueCredentialsProtocolApi = new Blocktrust.PrismAgentApi.Api.IssueCredentialsProtocolApi(
             configuration: new Configuration(defaultHeaders: new Dictionary<string, string>() { { "apiKey", agent.AgentApiKey } },
@@ -168,11 +168,9 @@ public class CredentialIssuingService : ICredentialIssuingService
                 return Result.Fail("Error parsing recordId as GUID");
             }
 
-            //TODO BUG IN PRISM!
             if (string.IsNullOrEmpty(createdCredentialOffer.SubjectDid))
             {
-                createdCredentialOffer.SubjectDid = agent.LocalDids.Dids.FirstOrDefault(p => !p.IsPublished)?.Did ??
-                                                    "did:prism:ab205c990a7600e7b3cf4215ea1f3cd09574021d53fc309d288bebce96569554";
+                createdCredentialOffer.SubjectDid = subjectDid.Did;
             }
 
             var acceptCredentialOfferAsync = await issueCredentialsProtocolApi.AcceptCredentialOfferAsync(recordId, new AcceptCredentialOfferRequest(createdCredentialOffer.SubjectDid));
@@ -180,7 +178,7 @@ public class CredentialIssuingService : ICredentialIssuingService
                 recordId: acceptCredentialOfferAsync.RecordId,
                 protocolState: acceptCredentialOfferAsync.ProtocolState,
                 issuerDid: acceptCredentialOfferAsync.IssuingDID,
-                subjectDid: acceptCredentialOfferAsync.SubjectId,
+                subjectDid: subjectDid.Did,
                 claims: acceptCredentialOfferAsync.Claims,
                 automaticIssuance: acceptCredentialOfferAsync.AutomaticIssuance,
                 schemaId: acceptCredentialOfferAsync.SchemaId,
