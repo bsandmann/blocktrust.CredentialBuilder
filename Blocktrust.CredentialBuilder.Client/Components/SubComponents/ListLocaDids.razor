@@ -3,24 +3,31 @@
 <div class="pt-5 px-5 pb-3">
     <MudText Typo="Typo.subtitle2">Existing DIDs</MudText>
     <ul class="mt-3">
-        @foreach (var localDid in Agent.LocalDids.Dids.OrderByDescending(p => p.IsPublished))
+        @if (Agent.LocalDids.Dids.Any())
         {
-            <li>
-                <MudText Typo="Typo.body2" Class="mb-2">
-                    <MudStack Row="true">
-                        <strong>
-                            @(localDid.IsPublished ? "Published: " : "Local:     ")
-                        </strong>
-                        <Ellipsis StringContent="@localDid.Did" IncludeCopyIcon="true" IsDid="true" />
-                        @if (localDid.IsPublished)
-                        {
-                            <MudLink Typo="Typo.body2" Color="Color.Info" Href="@BlocktrustAnalyticsUrl(localDid.Did)" Target="_blank">
-                                Resolve
-                            </MudLink>
-                        }
-                    </MudStack>
-                </MudText>
-            </li>
+            @foreach (var localDid in Agent.LocalDids.Dids.OrderByDescending(p => p.IsPublished))
+            {
+                <li>
+                    <MudText Typo="Typo.body2" Class="mb-2">
+                        <MudStack Row="true">
+                            <strong>
+                                @(localDid.IsPublished ? "Published: " : "Local:     ")
+                            </strong>
+                            <Ellipsis StringContent="@localDid.Did" IncludeCopyIcon="true" IsDid="true"/>
+                            @if (localDid.IsPublished)
+                            {
+                                <MudLink Typo="Typo.body2" Color="Color.Info" Href="@BlocktrustAnalyticsUrl(localDid.Did)" Target="_blank">
+                                    Resolve
+                                </MudLink>
+                            }
+                        </MudStack>
+                    </MudText>
+                </li>
+            }
+        }
+        else
+        {
+            <li><em>No DIDs have been created on this agent</em></li>
         }
     </ul>
 </div>

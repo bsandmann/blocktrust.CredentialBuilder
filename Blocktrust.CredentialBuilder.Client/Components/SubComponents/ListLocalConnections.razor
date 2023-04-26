@@ -4,17 +4,26 @@
 <div class="pt-5 px-5 pb-3">
     <MudText Typo="Typo.subtitle2">Existing Connections</MudText>
     <ul class="mt-3">
-    @foreach (var connection in Agent.Connections.Connections)
-    {
-        @if (string.IsNullOrWhiteSpace(connection.Label) || connection.Label.Equals(ConnectionService.UnnamedConnectionLabel, StringComparison.InvariantCultureIgnoreCase))
+        @if (Agent.Connections.Connections.Any())
         {
-            <li>@connection.ConnectionId</li>
+            @foreach (var connection in Agent.Connections.Connections)
+            {
+                @if (string.IsNullOrWhiteSpace(connection.Label) || connection.Label.Equals(ConnectionService.UnnamedConnectionLabel, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    <li>@connection.ConnectionId</li>
+                }
+                else
+                {
+                    <li>@connection.Label</li>
+                }
+            }
         }
         else
         {
-            <li>@connection.Label</li>
+            <li>
+                <em>No established connections</em>
+            </li>
         }
-    }
     </ul>
 </div>
 

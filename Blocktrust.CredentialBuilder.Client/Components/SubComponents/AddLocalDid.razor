@@ -22,7 +22,7 @@
     @if (_action == EnumDidAction.LocalDidCreated)
     {
         <MudStack>
-            <MudText Typo="Typo.body2">A new DID has been created, do you want it to use only locally or publish it?</MudText>
+            <MudText Typo="Typo.body2">A new DID has been created locally, do you want to publish it to the VDR (blockchain)?</MudText>
             <MudStack Row="true">
                 <MudText Typo="Typo.body2">
                     <strong>DID</strong>
@@ -40,14 +40,14 @@
                 </MudText>
             </MudStack>
             <MudAlert Severity="Severity.Info">
-                Publishing a DID to a VDR is only required if you want to issue Verifiable Credentials. Otherwise it is recommended to use the DID only locally.
+                Publishing a DID to a VDR is only required if you want to issue Verifiable Credentials. Otherwise, it is recommended to use the DID only locally and cancel the operation.
             </MudAlert>
             @if (!IsPublishing)
             {
                 <MudStack Row="true">
-                    <MudButton OnClick="Reset" Variant="Variant.Filled">Local usage</MudButton>
+                    <MudButton OnClick="Reset" Variant="Variant.Filled">Cancel</MudButton>
                     <MudSpacer></MudSpacer>
-                    <MudButton Variant="Variant.Filled" OnClick="PublishDid">Publish</MudButton>
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Create" OnClick="PublishDid">Publish</MudButton>
                 </MudStack>
             }
             else

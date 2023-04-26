@@ -32,7 +32,7 @@ else if (_action == EnumConnectionAction.InvitationGenerated)
         </MudStack>
         <MudStack Row="true">
             <MudText Typo="Typo.body2">
-                <strong>InviationId</strong>
+                <strong>InvitationId</strong>
             </MudText>
             <MudText Typo="Typo.body2">@OobInvitation.InvitationId</MudText>
         </MudStack>
@@ -49,7 +49,7 @@ else if (_action == EnumConnectionAction.InvitationGenerated)
             <MudStack Row="true">
                 <MudButton Variant="Variant.Outlined" OnClick="CancelWaitForOobInvitation" Size="Size.Small">Cancel</MudButton>
                 <MudSpacer></MudSpacer>
-                <MudText Typo="Typo.body2">
+                <MudText Class="mt-1" Typo="Typo.body2">
                     <em>Waiting for connection</em>
                 </MudText>
             </MudStack>
@@ -61,7 +61,11 @@ else if (_action == EnumConnectionAction.ReadyToAcceptInvitation)
     <MudStack Class="mt-2">
         <MudText Typo="Typo.body2">Paste the invitation here</MudText>
         <MudTextField @bind-Value="@InvitationLink" Label="Paste the invitation here" Style="font-weight:300;" Variant="Variant.Text"/>
-        <MudButton Class="my-2" Variant="Variant.Filled" OnClick="AcceptOobInvitation" StartIcon="@Icons.Material.Filled.QrCodeScanner">Accept</MudButton>
+        <MudStack Class="my-2" Row="true">
+            <MudButton Variant="Variant.Filled" OnClick="Reset">Cancel</MudButton>
+            <MudSpacer/>
+            <MudButton Variant="Variant.Filled" Disabled="String.IsNullOrEmpty(InvitationLink)" OnClick="AcceptOobInvitation" StartIcon="@Icons.Material.Filled.QrCodeScanner">Accept</MudButton>
+        </MudStack>
     </MudStack>
 }
 else if (_action == EnumConnectionAction.ConnectionRequestSent)
@@ -257,8 +261,11 @@ else if (_action == EnumConnectionAction.TimeoutOrFailed)
         if (oobInvitationResult.IsFailed)
         {
             Snackbar.Add(oobInvitationResult.Errors.First().Message, Severity.Error);
+            CreateOobInvitationLabel = string.Empty;
             return;
         }
+        
+        CreateOobInvitationLabel = string.Empty;
         OobInvitation = oobInvitationResult.Value;
         _action = EnumConnectionAction.InvitationGenerated;
         _establishedConnection = null;
@@ -288,6 +295,11 @@ else if (_action == EnumConnectionAction.TimeoutOrFailed)
     {
         if (string.IsNullOrEmpty(InvitationLink))
         {
+            return;
+        }
+        if (!InvitationLink.Contains("?_oob="))
+        {
+            Snackbar.Add("The OOB connection is invalid. Please copy the 'Invitation' from another agent and paste it here", Severity.Error);
             return;
         }
 
@@ -341,13 +353,13 @@ else if (_action == EnumConnectionAction.TimeoutOrFailed)
     private void Reset()
     {
         CreateOobInvitationLabel = string.Empty;
+        InvitationLink = null;
         OobInvitation = null;
         AcceptedInvitation = null;
         CancellationTokenSource _createOobInvitationCancellationTokenSource = new CancellationTokenSource();
         CancellationTokenSource _acceptOobInvitationCancellationTokenSource = new CancellationTokenSource();
         _establishedConnection = null;
         _action = EnumConnectionAction.None;
-        string? InvitationLink = null;
     }
 
 }

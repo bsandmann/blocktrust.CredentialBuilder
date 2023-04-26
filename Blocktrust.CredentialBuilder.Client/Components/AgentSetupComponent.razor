@@ -16,9 +16,9 @@ else
     <MudPaper Class="mr-2 mt-4 pa-3" Style="width: 450px;  height: fit-content;">
         <MudStack Row="false">
             <MudText Typo="Typo.h4">Agent setup</MudText>
-            <MudText Typo="Typo.body2">First we have to setup the connection to your <em>PRISM hosted agent</em>. Please provide the instance of the agent as well as the API-Key for that instance.</MudText>
+            <MudText Typo="Typo.body2">First, we have to set up the connection to your <em>PRISM hosted agent</em>. Please provide the instance of the agent as well as the API key for that instance.</MudText>
             <MudAlert Severity="Severity.Info">
-                All data is kept your in browser and is not sent to any server (other than the PRISM agent itself).
+                All data is kept in your browser and is not sent to any server (other than the PRISM agent itself).
                 It is stored in your browser's <strong>local storage</strong> and will automatically reappear when you visit this page again.
             </MudAlert>
             <MudDivider></MudDivider>
@@ -38,7 +38,7 @@ else
             <MudText Class="mt-3" Typo="Typo.body2">API key</MudText>
             <MudTextField @bind-Value="AgentApiKey" Label="API key" Variant="Variant.Filled" InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="ToggleShowApiKey" AdornmentAriaLabel="Show API key"/>
             <MudText Class="mt-3" Typo="Typo.body2"><strong></strong> Agent name (optional)</MudText>
-            <MudTextField @bind-Value="AgentName" Label="Readable name e.g. Issuer" Variant="Variant.Filled"/>
+            <MudTextField @bind-Value="AgentName" Label="Readable name, e.g. 'Issuer'" Variant="Variant.Filled"/>
             <MudStack Row="true">
                 <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="CancelSetup">Cancel</MudButton>
                 <MudSpacer></MudSpacer>
@@ -101,7 +101,7 @@ else
         var connectionResult = await ConnectionService.GetListOfConnections(agentResult.Value);
         if (connectionResult.IsFailed)
         {
-            Snackbar.Add("Could not establish a connection to the provided agent", Severity.Error);
+            Snackbar.Add("Could not establish a connection to the provided agent instance", Severity.Error);
             _isCreating = false;
             return;
         }
