@@ -1,4 +1,5 @@
 ﻿@using Blocktrust.CredentialBuilder.Client.Models
+@using Blocktrust.CredentialBuilder.Client.Models.Connections
 @using Blocktrust.CredentialBuilder.Client.Services
 
 <div class="pt-5 px-5 pb-3">
@@ -10,11 +11,23 @@
             {
                 @if (string.IsNullOrWhiteSpace(connection.Label) || connection.Label.Equals(ConnectionService.UnnamedConnectionLabel, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    <li>@connection.ConnectionId</li>
+                    <li>
+                        <MudStack Row="true">
+                            @connection.ConnectionId
+                            <MudTooltip Style="" Text="@GetTooltipText(connection)" Arrow="true" Placement="Placement.Bottom">
+                                <MudIcon Icon="@Icons.Material.Filled.PrivateConnectivity" Size="Size.Small"/>
+                            </MudTooltip>
+                        </MudStack>
+                    </li>
                 }
                 else
                 {
-                    <li>@connection.Label</li>
+                    <MudStack Row="true">
+                        @connection.Label
+                        <MudTooltip Style="" Text="@GetTooltipText(connection)" Arrow="true" Placement="Placement.Bottom">
+                            <MudIcon Icon="@Icons.Material.Filled.PrivateConnectivity" Size="Size.Small"/>
+                        </MudTooltip>
+                    </MudStack>
                 }
             }
         }
@@ -31,5 +44,10 @@
 
     [Parameter]
     public Agent Agent { get; set; }
+
+    private string GetTooltipText(EstablishedConnection connection)
+    {
+        return String.Concat("from ", connection.LocalPeerDid.Substring(0, 20), "... to ", connection.RemotePeerDid.Substring(0, 20),"...");
+    }
 
 }

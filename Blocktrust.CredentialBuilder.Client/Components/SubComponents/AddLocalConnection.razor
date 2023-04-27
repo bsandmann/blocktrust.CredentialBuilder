@@ -124,7 +124,7 @@ else if (_action == EnumConnectionAction.ConnectionResponseSent)
     <MudStack Class="mt-2">
         <MudStack Row="true">
             <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.Check"></MudIcon>
-            <MudText Typo="Typo.body2">Connection established<br/> (from the perspective of the inviter)</MudText>
+            <MudText Typo="Typo.body2">Connection established<br/> <em>(from the perspective of the inviter)</em></MudText>
         </MudStack>
         <div class="ml-9">
             @if (!string.IsNullOrEmpty(_establishedConnection!.Label))
@@ -172,7 +172,7 @@ else if (_action == EnumConnectionAction.ConnectionResponseReceived)
     <MudStack Class="mt-2">
         <MudStack Row="true">
             <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.Check"></MudIcon>
-            <MudText Typo="Typo.body2">Connection established<br/> (from the perspective of the invitee)</MudText>
+            <MudText Typo="Typo.body2">Connection established<br/> <em>(from the perspective of the invitee)</em></MudText>
         </MudStack>
         <div class="ml-9">
             @if (!string.IsNullOrEmpty(_establishedConnection!.Label))
@@ -209,7 +209,7 @@ else if (_action == EnumConnectionAction.ConnectionResponseReceived)
                 </MudText>
             </MudStack>
         </div>
-        <p> TODO: offer a field to name the connection!</p>
+        @* <p> TODO: offer a field to name the connection!</p> *@
         <MudStack Row="true">
             <MudSpacer></MudSpacer>
             <MudButton OnClick="Reset" Variant="Variant.Filled">Continue</MudButton>
