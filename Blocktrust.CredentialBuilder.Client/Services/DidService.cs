@@ -17,7 +17,7 @@ public class DidService : IDidService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
-            var createManagedDidResponse = await didRegistrarApi.CreateManagedDidAsync(new CreateManagedDidRequest(
+            var response = await didRegistrarApi.CreateManagedDidAsync(new CreateManagedDidRequest(
                 new CreateManagedDidRequestDocumentTemplate(
                     new List<ManagedDIDKeyTemplate>()
                     {
@@ -28,7 +28,7 @@ public class DidService : IDidService
                     {
                         new Service(id:"service-1", type: Service.TypeEnum.LinkedDomains, serviceEndpoint: new List<string>() { "https://some.service" })
                     })));
-            return Result.Ok(new LocalDid(createManagedDidResponse.LongFormDid));
+            return Result.Ok(new LocalDid(response.LongFormDid));
         }
         catch (Exception e)
         {
@@ -45,7 +45,7 @@ public class DidService : IDidService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
-            var publishManagedDidResponse = await didRegistrarApi.PublishManagedDidAsync(localDid.Did);
+            var response = await didRegistrarApi.PublishManagedDidAsync(localDid.Did);
             localDid.Published();
             return Result.Ok(localDid);
         }
@@ -71,10 +71,10 @@ public class DidService : IDidService
         async Task OnTimerElapsedAsync(object state)
         {
             attempts++;
-            var status = await didRegistrarApi.GetManagedDidAsync(did.Did, cancellationToken);
-            if (status.Status == ManagedDID.StatusEnum.PUBLISHED)
+            var response = await didRegistrarApi.GetManagedDidAsync(did.Did, cancellationToken);
+            if (response.Status == ManagedDID.StatusEnum.PUBLISHED)
             {
-                tcs.TrySetResult(Result.Ok(status.Status));
+                tcs.TrySetResult(Result.Ok(response.Status));
             }
             else if (attempts >= GlobalSettings.MaxAttempts)
             {

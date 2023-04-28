@@ -18,7 +18,7 @@ public class CredentialIssuingService : ICredentialIssuingService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
-            var createCredentialOfferResponse = await issueCredentialsProtocolApi.CreateCredentialOfferAsync(
+            var response = await issueCredentialsProtocolApi.CreateCredentialOfferAsync(
                 new CreateIssueCredentialRecordRequest(
                     schemaId: preparedCredential.SchemaId,
                     validityPeriod: 0M,
@@ -27,16 +27,16 @@ public class CredentialIssuingService : ICredentialIssuingService
                     issuingDID: preparedCredential.IssuerDid.Did,
                     connectionId: preparedCredential.EstablishedConnection.ConnectionId.ToString()));
             var createdCredential = new CreatedCredentialOffer(
-                recordId: createCredentialOfferResponse.RecordId,
-                protocolState: createCredentialOfferResponse.ProtocolState,
+                recordId: response.RecordId,
+                protocolState: response.ProtocolState,
                 issuerDid: preparedCredential.IssuerDid.Did, // ATTENTION: This value currently comes from the prepared credential, but it should come from the response (I believe)
                 subjectDid: null,
-                claims: createCredentialOfferResponse.Claims,
-                automaticIssuance: createCredentialOfferResponse.AutomaticIssuance,
-                schemaId: createCredentialOfferResponse.SchemaId,
-                validityPeriod: createCredentialOfferResponse.ValidityPeriod,
-                createdAt: createCredentialOfferResponse.CreatedAt,
-                jwtCredential: createCredentialOfferResponse.JwtCredential);
+                claims: response.Claims,
+                automaticIssuance: response.AutomaticIssuance,
+                schemaId: response.SchemaId,
+                validityPeriod: response.ValidityPeriod,
+                createdAt: response.CreatedAt,
+                jwtCredential: response.JwtCredential);
             return Result.Ok(createdCredential);
         }
         catch (Exception e)
@@ -54,19 +54,19 @@ public class CredentialIssuingService : ICredentialIssuingService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
-            var getCredentialRecordsResponse = await issueCredentialsProtocolApi.GetCredentialRecordsAsync();
+            var response = await issueCredentialsProtocolApi.GetCredentialRecordsAsync();
             //TODO paging!
             var listReceivedCredentialOffers = new List<CreatedCredentialOffer>();
             IEnumerable<IssueCredentialRecord> filteredList;
             if (timeSpanOfListing is null)
             {
-                filteredList = getCredentialRecordsResponse.Contents
+                filteredList = response.Contents
                     .Where(p => p.ProtocolState == expectedState)
                     .OrderByDescending(p => p.CreatedAt);
             }
             else
             {
-                filteredList = getCredentialRecordsResponse.Contents
+                filteredList = response.Contents
                     .Where(p => p.ProtocolState == expectedState && p.CreatedAt > DateTime.UtcNow - timeSpanOfListing)
                     .OrderByDescending(p => p.CreatedAt);
             }
@@ -111,22 +111,21 @@ public class CredentialIssuingService : ICredentialIssuingService
         async Task OnTimerElapsedAsync(object state)
         {
             attempts++;
-            var credentialRecord = await issueCredentialsProtocolApi.GetCredentialRecordAsync(credentialRecordId, cancellationToken);
-            var ff = credentialRecord.ProtocolState;
-            if (credentialRecord.ProtocolState == IssueCredentialRecord.ProtocolStateEnum.CredentialSent)
+            var response = await issueCredentialsProtocolApi.GetCredentialRecordAsync(credentialRecordId, cancellationToken);
+            if (response.ProtocolState == IssueCredentialRecord.ProtocolStateEnum.CredentialSent)
             {
                 // not really a nice solutions, since we have the created offer already in the db
                 var receivedCredentialOffer = new CreatedCredentialOffer(
-                    recordId: credentialRecord.RecordId,
-                    protocolState: credentialRecord.ProtocolState,
-                    issuerDid: credentialRecord.IssuingDID,
-                    subjectDid: credentialRecord.SubjectId,
-                    claims: credentialRecord.Claims,
-                    automaticIssuance: credentialRecord.AutomaticIssuance,
-                    schemaId: credentialRecord.SchemaId,
-                    validityPeriod: credentialRecord.ValidityPeriod,
-                    createdAt: credentialRecord.CreatedAt,
-                    jwtCredential: credentialRecord.JwtCredential);
+                    recordId: response.RecordId,
+                    protocolState: response.ProtocolState,
+                    issuerDid: response.IssuingDID,
+                    subjectDid: response.SubjectId,
+                    claims: response.Claims,
+                    automaticIssuance: response.AutomaticIssuance,
+                    schemaId: response.SchemaId,
+                    validityPeriod: response.ValidityPeriod,
+                    createdAt: response.CreatedAt,
+                    jwtCredential: response.JwtCredential);
                 tcs.TrySetResult(Result.Ok(receivedCredentialOffer));
             }
             else if (attempts >= GlobalSettings.MaxAttempts)
@@ -173,18 +172,18 @@ public class CredentialIssuingService : ICredentialIssuingService
                 createdCredentialOffer.SubjectDid = subjectDid.Did;
             }
 
-            var acceptCredentialOfferAsync = await issueCredentialsProtocolApi.AcceptCredentialOfferAsync(recordId, new AcceptCredentialOfferRequest(createdCredentialOffer.SubjectDid));
+            var response = await issueCredentialsProtocolApi.AcceptCredentialOfferAsync(recordId, new AcceptCredentialOfferRequest(createdCredentialOffer.SubjectDid));
             var createdCredential = new CreatedCredentialOffer(
-                recordId: acceptCredentialOfferAsync.RecordId,
-                protocolState: acceptCredentialOfferAsync.ProtocolState,
-                issuerDid: acceptCredentialOfferAsync.IssuingDID,
+                recordId: response.RecordId,
+                protocolState: response.ProtocolState,
+                issuerDid: response.IssuingDID,
                 subjectDid: subjectDid.Did,
-                claims: acceptCredentialOfferAsync.Claims,
-                automaticIssuance: acceptCredentialOfferAsync.AutomaticIssuance,
-                schemaId: acceptCredentialOfferAsync.SchemaId,
-                validityPeriod: acceptCredentialOfferAsync.ValidityPeriod,
-                createdAt: acceptCredentialOfferAsync.CreatedAt,
-                jwtCredential: acceptCredentialOfferAsync.JwtCredential);
+                claims: response.Claims,
+                automaticIssuance: response.AutomaticIssuance,
+                schemaId: response.SchemaId,
+                validityPeriod: response.ValidityPeriod,
+                createdAt: response.CreatedAt,
+                jwtCredential: response.JwtCredential);
             return Result.Ok(createdCredential);
         }
         catch (Exception e)

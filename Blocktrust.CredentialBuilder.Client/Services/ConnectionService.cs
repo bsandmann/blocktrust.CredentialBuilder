@@ -31,8 +31,8 @@ public class ConnectionService : IConnectionService
         {
             //TODO implement pagination
 
-            var connectionsResponse = await connectionsManagementApi.GetConnectionsAsync();
-            var connections = connectionsResponse.Contents;
+            var response = await connectionsManagementApi.GetConnectionsAsync();
+            var connections = response.Contents;
             return Result.Ok(connections);
         }
         catch (Exception e)
@@ -55,10 +55,10 @@ public class ConnectionService : IConnectionService
                 label = UnnamedConnectionLabel;
             }
 
-            var createConnectionResponse = await connectionsManagementApi.CreateConnectionAsync(new CreateConnectionRequest(label));
-            var invitationUrl = createConnectionResponse.Invitation.InvitationUrl;
-            var invitationId = createConnectionResponse.Invitation.Id;
-            var invitationFrom = createConnectionResponse.Invitation.From;
+            var response = await connectionsManagementApi.CreateConnectionAsync(new CreateConnectionRequest(label));
+            var invitationUrl = response.Invitation.InvitationUrl;
+            var invitationId = response.Invitation.Id;
+            var invitationFrom = response.Invitation.From;
 
             return Result.Ok(new OobInvitation(invitationUrl, invitationId, invitationFrom));
         }
@@ -84,8 +84,8 @@ public class ConnectionService : IConnectionService
         async Task OnTimerElapsedAsync(object state)
         {
             attempts++;
-            var connections = await GetListOfConnections(agent);
-            var connection = connections.Value.FirstOrDefault(c => c.Invitation.Id.Equals(invitationId));
+            var response = await GetListOfConnections(agent);
+            var connection = response.Value.FirstOrDefault(c => c.Invitation.Id.Equals(invitationId));
             if (connection is not null && connection.State == Connection.StateEnum.ConnectionResponseSent)
             {
                 var label = connection.Label;
@@ -208,8 +208,8 @@ public class ConnectionService : IConnectionService
         async Task OnTimerElapsedAsync(object state)
         {
             attempts++;
-            var connections = await GetListOfConnections(agent);
-            var connection = connections.Value.FirstOrDefault(c => c.Invitation.Id.Equals(invitationId));
+            var response = await GetListOfConnections(agent);
+            var connection = response.Value.FirstOrDefault(c => c.Invitation.Id.Equals(invitationId));
             if (connection is not null && connection.State == Connection.StateEnum.ConnectionResponseReceived)
             {
                 var label = connection.Label;

@@ -2,6 +2,11 @@
 @using Blocktrust.CredentialBuilder.Client.Models
 @using Blocktrust.CredentialBuilder.Client.Models.Connections
 @using Blocktrust.CredentialBuilder.Client.Models.Dids
+@using Blocktrust.CredentialBuilder.Client.Services
+@inject IConnectionService ConnectionService;
+@inject ISnackbar Snackbar
+@inject IAgentService AgentService;
+@inject IPresentationService PresentationService;
 
 <div class="pt-5 px-3 pb-3">
     @if (_action == EnumPresentationAction.None)
@@ -73,6 +78,7 @@
     
     EnumPresentationAction _action = EnumPresentationAction.None;
     EstablishedConnection? _selectedConnection = null;
+    bool _isWaitingForAcceptance = false;
     
     private void OnSelectConnectionValueChanged(EstablishedConnection connection)
     {
@@ -94,9 +100,52 @@
         _selectedConnection = null;
     }
 
-    private void ContinueWithPresentationRequest()
+    private async Task ContinueWithPresentationRequest()
     {
-        throw new NotImplementedException();
+        if (_selectedConnection is null)
+        {
+            return;
+        }
+
+    // if (!_holderDidPasted!.StartsWith("did:prism:"))
+    // {
+    //     Snackbar.Add("The provided SubjectDID has to be a PRISM DID", Severity.Error);
+    //     return;
+    // }
+
+        var presentationRequestResult = await PresentationService.CreatePresentationRequest(Agent, new PreparedPresentationRequest(
+            establishedConnection: _selectedConnection
+            ));
+
+        if (presentationRequestResult.IsFailed)
+        {
+            Snackbar.Add(presentationRequestResult.Errors.First().Message, Severity.Error);
+            return;
+        }
+        
+        // Agent.AddCredentialOffer(presentationRequestResult.Value);
+        // await AgentService.Save(Agent);
+        _isWaitingForAcceptance = true;
+        StateHasChanged();
+
+        // var isParsedAsGuid = Guid.TryParse(presentationRequestResult.Value.RecordId, out var recordId);
+        // if (!isParsedAsGuid)
+        // {
+        //     Snackbar.Add("The record Id could not be parsed as GUID", Severity.Error);
+        //     return;
+        // }
+        // _recordIdWaitingForAcceptance = recordId;
+
+        // var acceptanceResult = await CredentialIssuingService.WaitForCredentialOfferAcceptance(Agent, _recordIdWaitingForAcceptance.Value, new CancellationToken());
+        // if (acceptanceResult.IsFailed)
+        // {
+        //     Snackbar.Add(acceptanceResult.Errors.First().Message, Severity.Error);
+        //     _action = EnumCredentialAction.TimeoutOrFailed;
+        //     return;
+        // }
+        //
+        // Parent.RefreshState();
+        // _isWaitingForAcceptance = false;
     }
 
 }

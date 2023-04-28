@@ -15,6 +15,7 @@ builder.Services.AddSingleton<IAgentService, AgentService>();
 builder.Services.AddSingleton<IStorageService, StorageService>();
 builder.Services.AddSingleton<IDidService, DidService>();
 builder.Services.AddSingleton<ICredentialIssuingService, CredentialIssuingService>();
+builder.Services.AddSingleton<IPresentationService, PresentationService>();
 builder.Services.AddBlazoredLocalStorageAsSingleton();
 builder.Services.AddMudServices();
 
