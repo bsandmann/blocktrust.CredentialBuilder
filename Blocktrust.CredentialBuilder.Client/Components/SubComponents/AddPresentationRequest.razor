@@ -1,0 +1,102 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Models.Presentations
+@using Blocktrust.CredentialBuilder.Client.Models
+@using Blocktrust.CredentialBuilder.Client.Models.Connections
+@using Blocktrust.CredentialBuilder.Client.Models.Dids
+
+<div class="pt-5 px-3 pb-3">
+    @if (_action == EnumPresentationAction.None)
+    {
+        <MudStack>
+            <MudText Typo="Typo.subtitle2">Create new presentation request</MudText>
+            <div>
+                @if (!Agent.Connections.Connections.Any())
+                {
+                    <MudAlert Severity="Severity.Warning">You must first connect to the agent who is a holder (prover) of a credential</MudAlert>
+                }
+                else
+                {
+                    <MudStack Row="true">
+                        <MudText Typo="Typo.body2">Select connection</MudText>
+                        <MudIcon Icon="@Icons.Material.Filled.PrivateConnectivity" Size="Size.Small"/>
+                    </MudStack>
+                    <MudSelect T="EstablishedConnection" ValueChanged="OnSelectConnectionValueChanged" Value="_selectedConnection" ToStringFunc="@_connectionConverter" Label="Connection to other agent" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var connection in Agent.Connections.Connections)
+                        {
+                            <MudSelectItem Value="@connection"/>
+                        }
+                    </MudSelect>
+                }
+            </div>
+            <MudDivider></MudDivider>
+            
+            @* <div> *@
+            @*     @if (!Agent.LocalDids.Dids.Any(p => p.IsPublished)) *@
+            @*     { *@
+            @*         <MudAlert Severity="Severity.Warning"> *@
+            @*             You must first create a DID that will be published on the VDR (blockchain) to issue credentials *@
+            @*         </MudAlert> *@
+            @*     } *@
+            @*     else *@
+            @*     { *@
+            @*         <MudText Typo="Typo.body2">Select Issuer DID</MudText> *@
+            @*         <MudSelect T="LocalDid" ValueChanged="OnSelectDidValueChanged" Value="_selectedLocalDid" ToStringFunc="@_localDidConverter" Label="Issuer DID" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter"> *@
+            @*             @foreach (var localDid in Agent.LocalDids.Dids.Where(p => p.IsPublished)) *@
+            @*             { *@
+            @*                 <MudSelectItem Value="@localDid"/> *@
+            @*             } *@
+            @*         </MudSelect> *@
+            @*     } *@
+            @* </div> *@
+
+
+            <MudDivider></MudDivider>
+            <MudStack>
+                <MudStack Row="true">
+                    <!-- TODO -->
+                    <MudButton Disabled="false" OnClick="Reset" Variant="Variant.Outlined">Cancel</MudButton>
+                    <MudSpacer></MudSpacer>
+                    <MudButton Disabled="!Agent.LocalDids.Dids.Any(p => p.IsPublished) || !Agent.Connections.Connections.Any()" Variant="Variant.Outlined" OnClick="ContinueWithPresentationRequest">Continue</MudButton>
+                </MudStack>
+            </MudStack>
+        </MudStack>
+    }
+    else
+    {
+        <p>not implemented yet</p>
+    }
+</div>
+
+@code{
+
+    [Parameter]
+    public Agent Agent { get; set; }
+    
+    EnumPresentationAction _action = EnumPresentationAction.None;
+    EstablishedConnection? _selectedConnection = null;
+    
+    private void OnSelectConnectionValueChanged(EstablishedConnection connection)
+    {
+        _selectedConnection = connection;
+    }
+    
+    Func<EstablishedConnection, string?> _connectionConverter = p =>
+    {
+        if (string.IsNullOrWhiteSpace(p.Label) || p.Label.Equals(Services.ConnectionService.UnnamedConnectionLabel, StringComparison.InvariantCultureIgnoreCase))
+        {
+            return p.ConnectionId.ToString();
+        }
+        return p?.Label;
+    };
+    
+    private void Reset()
+    {
+        _action = EnumPresentationAction.None;
+        _selectedConnection = null;
+    }
+
+    private void ContinueWithPresentationRequest()
+    {
+        throw new NotImplementedException();
+    }
+
+}
