@@ -340,13 +340,13 @@ else if (_action == EnumConnectionAction.TimeoutOrFailed)
     private void CancelWaitForOobInvitation()
     {
         _createOobInvitationCancellationTokenSource.Cancel();
-        _action = EnumConnectionAction.None;
+        Reset();
     }
 
     private void CancelWaitForConfirmation()
     {
         _acceptOobInvitationCancellationTokenSource.Cancel();
-        _action = EnumConnectionAction.None;
+        Reset();
     }
 
 
@@ -356,8 +356,8 @@ else if (_action == EnumConnectionAction.TimeoutOrFailed)
         InvitationLink = null;
         OobInvitation = null;
         AcceptedInvitation = null;
-        CancellationTokenSource _createOobInvitationCancellationTokenSource = new CancellationTokenSource();
-        CancellationTokenSource _acceptOobInvitationCancellationTokenSource = new CancellationTokenSource();
+        _createOobInvitationCancellationTokenSource = new CancellationTokenSource();
+        _acceptOobInvitationCancellationTokenSource = new CancellationTokenSource();
         _establishedConnection = null;
         _action = EnumConnectionAction.None;
     }

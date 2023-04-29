@@ -36,7 +36,8 @@ public class CredentialIssuingService : ICredentialIssuingService
                 schemaId: response.SchemaId,
                 validityPeriod: response.ValidityPeriod,
                 createdAt: response.CreatedAt,
-                jwtCredential: Base64ToJwtDecoder(response.JwtCredential));
+                jwtCredential: Base64ToJwtDecoder(response.JwtCredential),
+                savedLocally: false);
             return Result.Ok(createdCredential);
         }
         catch (Exception e)
@@ -83,7 +84,8 @@ public class CredentialIssuingService : ICredentialIssuingService
                     schemaId: content.SchemaId,
                     validityPeriod: content.ValidityPeriod,
                     createdAt: content.CreatedAt,
-                    jwtCredential: Base64ToJwtDecoder(content.JwtCredential));
+                    jwtCredential: Base64ToJwtDecoder(content.JwtCredential),
+                    savedLocally: false);
                 listReceivedCredentialOffers.Add(receivedCredentialOffer);
             }
 
@@ -125,7 +127,8 @@ public class CredentialIssuingService : ICredentialIssuingService
                     schemaId: response.SchemaId,
                     validityPeriod: response.ValidityPeriod,
                     createdAt: response.CreatedAt,
-                    jwtCredential: Base64ToJwtDecoder(response.JwtCredential));
+                    jwtCredential: Base64ToJwtDecoder(response.JwtCredential), 
+                    savedLocally: false);
                 tcs.TrySetResult(Result.Ok(receivedCredentialOffer));
             }
             else if (attempts >= GlobalSettings.MaxAttempts)
@@ -183,7 +186,8 @@ public class CredentialIssuingService : ICredentialIssuingService
                 schemaId: response.SchemaId,
                 validityPeriod: response.ValidityPeriod,
                 createdAt: response.CreatedAt,
-                jwtCredential: Base64ToJwtDecoder(response.JwtCredential));
+                jwtCredential: Base64ToJwtDecoder(response.JwtCredential),
+                savedLocally: false);
             return Result.Ok(createdCredential);
         }
         catch (Exception e)

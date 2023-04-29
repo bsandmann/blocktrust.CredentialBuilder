@@ -47,17 +47,17 @@
                 </MudText>
             }
         </MudStack>
-        <MudStack Row="true">
-            <MudText Typo="Typo.body2">Select credential to share</MudText>
-        </MudStack>
-        <MudSelect T="CreatedCredentialOffer" ValueChanged="OnSelectCredentialValueChanged" Value="_selectedCredential" ToStringFunc="@_credentialConverter" Label="Credential to share" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-            @foreach (var credential in Agent.Credentials.CreatedCredentialOffers.Where(p => p.ProtocolState == IssueCredentialRecord.ProtocolStateEnum.CredentialReceived).DistinctBy(p => p.RecordId))
-            {
-                <MudSelectItem Value="@credential"/>
-            }
-        </MudSelect>
         @if (Presentation.Status == PrismAgentApi.Model.PresentationStatus.StatusEnum.RequestReceived)
         {
+            <MudStack Row="true">
+                <MudText Typo="Typo.body2">Select credential to share</MudText>
+            </MudStack>
+            <MudSelect T="CreatedCredentialOffer" ValueChanged="OnSelectCredentialValueChanged" Value="_selectedCredential" ToStringFunc="@_credentialConverter" Label="Credential to share" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                @foreach (var credential in Agent.Credentials.CreatedCredentialOffers.Where(p => p.ProtocolState == IssueCredentialRecord.ProtocolStateEnum.CredentialReceived).DistinctBy(p => p.RecordId))
+                {
+                    <MudSelectItem Value="@credential"/>
+                }
+            </MudSelect>
             <MudDivider/>
             <MudStack Row="true">
                 <MudButton Variant="Variant.Outlined" Disabled="_btnClicked" OnClick="() => AcceptRejectPresentationRequest(Presentation, false)">Reject request</MudButton>

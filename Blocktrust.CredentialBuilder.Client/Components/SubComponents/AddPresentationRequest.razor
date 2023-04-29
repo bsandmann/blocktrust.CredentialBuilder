@@ -39,7 +39,7 @@
                 <MudStack>
                     <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-2"/>
                     <MudStack Row="true">
-                        <MudButton Variant="Variant.Outlined" Size="Size.Small">Cancel TODO</MudButton>
+                        <MudButton Variant="Variant.Outlined" OnClick="CancelWaitForAcceptance" Size="Size.Small">Cancel</MudButton>
                         <MudSpacer></MudSpacer>
                         <MudText Class="mt-1" Typo="Typo.body2">
                             <em>
@@ -144,6 +144,8 @@
     bool _isWaitingForAcceptance = false;
     Guid? _presentationIdWaitingForAcceptance = null;
     CreatedPresentationStatus? _presentation = null;
+    CancellationTokenSource _requestPresentationCancellationTokenSource = new CancellationTokenSource();
+
 
     private void OnSelectConnectionValueChanged(EstablishedConnection connection)
     {
@@ -166,6 +168,7 @@
         _isWaitingForAcceptance = false;
         _presentationIdWaitingForAcceptance = null;
         _presentation = null;
+        _requestPresentationCancellationTokenSource = new CancellationTokenSource();
     }
 
     private async Task ContinueWithPresentationRequest()
@@ -194,8 +197,9 @@
             return;
         }
         _presentationIdWaitingForAcceptance = presentationId;
-
-        var acceptanceResult = await PresentationService.WaitForPresentationRequestAcceptance(Agent, _presentationIdWaitingForAcceptance.Value, new CancellationToken());
+        _requestPresentationCancellationTokenSource = new CancellationTokenSource();
+        CancellationToken cancellationToken = _requestPresentationCancellationTokenSource.Token;
+        var acceptanceResult = await PresentationService.WaitForPresentationRequestAcceptance(Agent, _presentationIdWaitingForAcceptance.Value, cancellationToken);
         if (acceptanceResult.IsFailed)
         {
             Snackbar.Add(acceptanceResult.Errors.First().Message, Severity.Error);
@@ -223,4 +227,11 @@
         
         Reset();
     }
+
+    private void CancelWaitForAcceptance()
+    {
+        _requestPresentationCancellationTokenSource.Cancel();
+        Reset();
+    }
+
 }

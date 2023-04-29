@@ -41,7 +41,7 @@ public class Agent
         LocalDids.Dids.Add(localDid);
     }
 
-    public void AddCredentialOffer(CreatedCredentialOffer credentialOffer)
+    public void AddCredential(CreatedCredentialOffer credentialOffer)
     {
         Credentials.CreatedCredentialOffers.Add(credentialOffer);
     }
