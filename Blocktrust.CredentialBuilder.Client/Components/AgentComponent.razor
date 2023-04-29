@@ -45,6 +45,10 @@
             <ListCredentials Agent="Agent" Title="Credential Offers" CredentialType="IssueCredentialRecord.ProtocolStateEnum.OfferReceived" TimeSpanOfListingInMinutes="5"/>
             <MudDivider/>
             <ListCredentials Agent="Agent" Title="Credentials" CredentialType="IssueCredentialRecord.ProtocolStateEnum.CredentialReceived" TimeSpanOfListingInMinutes="5"/>
+            <MudDivider/>
+            <ListPresentationRequests Agent="Agent" Title="Presentation Requests" TimeSpanOfListingInMinutes="5" PresentationStatus="PresentationStatus.StatusEnum.RequestReceived"/>
+            <MudDivider/>
+            <ListPresentationRequests Agent="Agent" Title="Presentations shared" TimeSpanOfListingInMinutes="5"/>
         </MudTabPanel>
         <MudTabPanel Text="Verifier">
             <CascadingValue Value="this">

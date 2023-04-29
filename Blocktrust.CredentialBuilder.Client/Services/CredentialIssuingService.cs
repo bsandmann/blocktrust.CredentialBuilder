@@ -36,7 +36,7 @@ public class CredentialIssuingService : ICredentialIssuingService
                 schemaId: response.SchemaId,
                 validityPeriod: response.ValidityPeriod,
                 createdAt: response.CreatedAt,
-                jwtCredential: response.JwtCredential);
+                jwtCredential: Base64ToJwtDecoder(response.JwtCredential));
             return Result.Ok(createdCredential);
         }
         catch (Exception e)
@@ -83,7 +83,7 @@ public class CredentialIssuingService : ICredentialIssuingService
                     schemaId: content.SchemaId,
                     validityPeriod: content.ValidityPeriod,
                     createdAt: content.CreatedAt,
-                    jwtCredential: content.JwtCredential);
+                    jwtCredential: Base64ToJwtDecoder(content.JwtCredential));
                 listReceivedCredentialOffers.Add(receivedCredentialOffer);
             }
 
@@ -125,7 +125,7 @@ public class CredentialIssuingService : ICredentialIssuingService
                     schemaId: response.SchemaId,
                     validityPeriod: response.ValidityPeriod,
                     createdAt: response.CreatedAt,
-                    jwtCredential: response.JwtCredential);
+                    jwtCredential: Base64ToJwtDecoder(response.JwtCredential));
                 tcs.TrySetResult(Result.Ok(receivedCredentialOffer));
             }
             else if (attempts >= GlobalSettings.MaxAttempts)
@@ -183,12 +183,38 @@ public class CredentialIssuingService : ICredentialIssuingService
                 schemaId: response.SchemaId,
                 validityPeriod: response.ValidityPeriod,
                 createdAt: response.CreatedAt,
-                jwtCredential: response.JwtCredential);
+                jwtCredential: Base64ToJwtDecoder(response.JwtCredential));
             return Result.Ok(createdCredential);
         }
         catch (Exception e)
         {
             return Result.Fail(e.Message);
         }
+    }
+
+    private string Base64ToJwtDecoder(string? base64String)
+    {
+        if (string.IsNullOrEmpty(base64String))
+        {
+            return string.Empty;
+        }
+
+        var output = base64String;
+        output = output.Replace('-', '+'); // 62nd char of encoding
+        output = output.Replace('_', '/'); // 63rd char of encoding
+        switch (output.Length % 4) // Pad with trailing '='s
+        {
+            case 0: break; // No pad chars in this case
+            case 2:
+                output += "==";
+                break; // Two pad chars
+            case 3:
+                output += "=";
+                break; // One pad char
+            default: throw new System.ArgumentOutOfRangeException(nameof(base64String), "Illegal base64url string!");
+        }
+
+        var converted = Convert.FromBase64String(output); // Standard base64 decoder
+        return System.Text.Encoding.UTF8.GetString(converted);
     }
 }

@@ -1,0 +1,117 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Models.Presentations
+@using Blocktrust.CredentialBuilder.Client.Models
+@using Blocktrust.CredentialBuilder.Client.Models.Credentials
+@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.PrismAgentApi.Model
+@inject IPresentationService PresentationService
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-3 mb-2">
+    <MudStack>
+        <MudStack Row="true">
+            <MudText Typo="Typo.body2">
+                <strong>
+                    PresentationId
+                </strong>
+            </MudText>
+            <MudText Typo="Typo.body2">
+                <Ellipsis IsDid="false" StringContent="@Presentation.PresentationId.ToString()" StringLength="30"></Ellipsis>
+            </MudText>
+        </MudStack>
+        <MudStack Row="true">
+            <MudText Typo="Typo.body2">
+                <strong>
+                    Status
+                </strong>
+            </MudText>
+            <MudText Typo="Typo.body2">
+                @Presentation.Status
+            </MudText>
+        </MudStack>
+        <MudStack Row="true">
+            <MudText Typo="Typo.body2">
+                <strong>
+                    ConnectionId
+                </strong>
+            </MudText>
+            @if (Presentation.ConnectionId is null)
+            {
+                <MudText Typo="Typo.body2">
+                    <em>not provided</em>
+                </MudText>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2">
+                    @Presentation.ConnectionId.ToString()
+                </MudText>
+            }
+        </MudStack>
+        <MudStack Row="true">
+            <MudText Typo="Typo.body2">Select credential to share</MudText>
+        </MudStack>
+        <MudSelect T="CreatedCredentialOffer" ValueChanged="OnSelectCredentialValueChanged" Value="_selectedCredential" ToStringFunc="@_credentialConverter" Label="Credential to share" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+            @foreach (var credential in Agent.Credentials.CreatedCredentialOffers.Where(p => p.ProtocolState == IssueCredentialRecord.ProtocolStateEnum.CredentialReceived).DistinctBy(p => p.RecordId))
+            {
+                <MudSelectItem Value="@credential"/>
+            }
+        </MudSelect>
+        @if (Presentation.Status == PrismAgentApi.Model.PresentationStatus.StatusEnum.RequestReceived)
+        {
+            <MudDivider/>
+            <MudStack Row="true">
+                <MudButton Variant="Variant.Outlined" Disabled="_btnClicked" OnClick="() => AcceptRejectPresentationRequest(Presentation, false)">Reject request</MudButton>
+                <MudSpacer/>
+                <MudButton Variant="Variant.Outlined" Disabled="_btnClicked || _selectedCredential is null" OnClick="() => AcceptRejectPresentationRequest(Presentation, true)">Accept request</MudButton>
+            </MudStack>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public Agent Agent { get; set; }
+
+    [Parameter]
+    public CreatedPresentationStatus Presentation { get; set; }
+
+    [CascadingParameter]
+    public ListPresentationRequests Parent { get; set; }
+
+    CreatedCredentialOffer? _selectedCredential;
+
+    bool _btnClicked = false;
+
+    private async Task AcceptRejectPresentationRequest(CreatedPresentationStatus presentation, bool acceptRequest)
+    {
+        if (_selectedCredential is null && acceptRequest is true)
+        {
+            return;
+        }
+        _btnClicked = true;
+        Guid? credentialRecordId = null;
+        if (acceptRequest is true)
+        {
+            credentialRecordId = Guid.Parse(_selectedCredential!.RecordId);
+        }
+        var result = await PresentationService.AcceptRejectPresentationRequest(Agent, presentation, credentialRecordId, acceptRequest);
+        if (result.IsFailed)
+        {
+            Snackbar.Add(result.Errors.First().Message, Severity.Error);
+            _btnClicked = false;
+            return;
+        }
+        _btnClicked = false;
+
+        await Parent.RefreshState();
+    }
+
+    Func<CreatedCredentialOffer, string?> _credentialConverter = p => { return p.RecordId; };
+
+    private void OnSelectCredentialValueChanged(CreatedCredentialOffer credential)
+    {
+        _selectedCredential = credential;
+    }
+
+}

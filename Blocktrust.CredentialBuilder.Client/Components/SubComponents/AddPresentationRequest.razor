@@ -3,6 +3,7 @@
 @using Blocktrust.CredentialBuilder.Client.Models.Connections
 @using Blocktrust.CredentialBuilder.Client.Models.Dids
 @using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Components.Helpers
 @inject IConnectionService ConnectionService;
 @inject ISnackbar Snackbar
 @inject IAgentService AgentService;
@@ -24,7 +25,7 @@
                         <MudText Typo="Typo.body2">Select connection</MudText>
                         <MudIcon Icon="@Icons.Material.Filled.PrivateConnectivity" Size="Size.Small"/>
                     </MudStack>
-                    <MudSelect T="EstablishedConnection" ValueChanged="OnSelectConnectionValueChanged" Value="_selectedConnection" ToStringFunc="@_connectionConverter" Label="Connection to other agent" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                    <MudSelect T="EstablishedConnection" Disabled="_isWaitingForAcceptance" ValueChanged="OnSelectConnectionValueChanged" Value="_selectedConnection" ToStringFunc="@_connectionConverter" Label="Connection to other agent" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
                         @foreach (var connection in Agent.Connections.Connections)
                         {
                             <MudSelectItem Value="@connection"/>
@@ -33,41 +34,100 @@
                 }
             </div>
             <MudDivider></MudDivider>
-            
-            @* <div> *@
-            @*     @if (!Agent.LocalDids.Dids.Any(p => p.IsPublished)) *@
-            @*     { *@
-            @*         <MudAlert Severity="Severity.Warning"> *@
-            @*             You must first create a DID that will be published on the VDR (blockchain) to issue credentials *@
-            @*         </MudAlert> *@
-            @*     } *@
-            @*     else *@
-            @*     { *@
-            @*         <MudText Typo="Typo.body2">Select Issuer DID</MudText> *@
-            @*         <MudSelect T="LocalDid" ValueChanged="OnSelectDidValueChanged" Value="_selectedLocalDid" ToStringFunc="@_localDidConverter" Label="Issuer DID" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter"> *@
-            @*             @foreach (var localDid in Agent.LocalDids.Dids.Where(p => p.IsPublished)) *@
-            @*             { *@
-            @*                 <MudSelectItem Value="@localDid"/> *@
-            @*             } *@
-            @*         </MudSelect> *@
-            @*     } *@
-            @* </div> *@
-
-
-            <MudDivider></MudDivider>
-            <MudStack>
-                <MudStack Row="true">
-                    <!-- TODO -->
-                    <MudButton Disabled="false" OnClick="Reset" Variant="Variant.Outlined">Cancel</MudButton>
-                    <MudSpacer></MudSpacer>
-                    <MudButton Disabled="!Agent.LocalDids.Dids.Any(p => p.IsPublished) || !Agent.Connections.Connections.Any()" Variant="Variant.Outlined" OnClick="ContinueWithPresentationRequest">Continue</MudButton>
+            @if (_isWaitingForAcceptance)
+            {
+                <MudStack>
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-2"/>
+                    <MudStack Row="true">
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small">Cancel TODO</MudButton>
+                        <MudSpacer></MudSpacer>
+                        <MudText Class="mt-1" Typo="Typo.body2">
+                            <em>
+                                Waiting for acceptance
+                            </em>
+                        </MudText>
+                    </MudStack>
                 </MudStack>
-            </MudStack>
+            }
+            else
+            {
+                <MudStack>
+                    <MudStack Row="true">
+                        <MudButton Disabled="_selectedConnection is null" OnClick="Reset" Variant="Variant.Outlined">Cancel</MudButton>
+                        <MudSpacer></MudSpacer>
+                        <MudButton Disabled="_selectedConnection is null" Variant="Variant.Outlined" OnClick="ContinueWithPresentationRequest">Continue</MudButton>
+                    </MudStack>
+                </MudStack>
+            }
         </MudStack>
     }
-    else
+    else if (_action == EnumPresentationAction.Review)
     {
-        <p>not implemented yet</p>
+        <MudStack Class="mt-2">
+            <MudStack Row="true">
+                <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.Check"></MudIcon>
+                <MudText Typo="Typo.body2">Presentation request approved</MudText>
+            </MudStack>
+            <div class="ml-9">
+                <MudStack Row="true">
+                    <MudText Typo="Typo.body2">
+                        <strong>
+                            Status
+                        </strong>
+                    </MudText>
+                    <MudText Typo="Typo.body2">
+                        @_presentation!.Status
+                    </MudText>
+                </MudStack>
+                <MudStack Row="true">
+                    <MudText Typo="Typo.body2">
+                        <strong>
+                            PresentationId
+                        </strong>
+                    </MudText>
+                    <MudText Typo="Typo.body2">
+                        <Ellipsis IsDid="false" StringContent="@_presentation!.PresentationId.ToString()" StringLength="30"></Ellipsis>
+                    </MudText>
+                </MudStack>
+                <MudStack Row="true">
+                    <MudText Typo="Typo.body2">
+                        <strong>
+                            ConnectionId
+                        </strong>
+                    </MudText>
+                    @if (_presentation!.ConnectionId is null)
+                    {
+                        <MudText Typo="Typo.body2">
+                            <em>not provided</em>
+                        </MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2">
+                            <Ellipsis IsDid="false" StringContent="@_presentation!.ConnectionId.ToString()" StringLength="30"></Ellipsis>
+                        </MudText>
+                    }
+                </MudStack>
+            </div>
+            <MudDivider></MudDivider>
+            @foreach (var jwt in _presentation!.CredentialData)
+            {
+                <MudText Typo="Typo.body2" Class="mt-2">
+                    <strong>
+                        JWT
+                    </strong>
+                </MudText>
+                <MudText Style="border-width: 1px !important; overflow-wrap: anywhere; overflow: scroll; max-height: 110px" Typo="Typo.body2" Class="border-dotted border-2 mud-border-info grey lighten-5 rounded py-2 px-3">
+                    @jwt
+                </MudText>
+            }
+            <MudDivider></MudDivider>
+            <MudStack Row="true">
+                <MudButton Variant="Variant.Outlined" OnClick="() => AcceptRejectPresentation(_presentation, false)">Reject</MudButton>
+                <MudSpacer/>
+                <MudButton Variant="Variant.Outlined" OnClick="() => AcceptRejectPresentation(_presentation, true)">Accept</MudButton>
+            </MudStack>
+        </MudStack>
     }
 </div>
 
@@ -75,16 +135,21 @@
 
     [Parameter]
     public Agent Agent { get; set; }
-    
+
+    [CascadingParameter]
+    public AgentComponent Parent { get; set; }
+
     EnumPresentationAction _action = EnumPresentationAction.None;
     EstablishedConnection? _selectedConnection = null;
     bool _isWaitingForAcceptance = false;
-    
+    Guid? _presentationIdWaitingForAcceptance = null;
+    CreatedPresentationStatus? _presentation = null;
+
     private void OnSelectConnectionValueChanged(EstablishedConnection connection)
     {
         _selectedConnection = connection;
     }
-    
+
     Func<EstablishedConnection, string?> _connectionConverter = p =>
     {
         if (string.IsNullOrWhiteSpace(p.Label) || p.Label.Equals(Services.ConnectionService.UnnamedConnectionLabel, StringComparison.InvariantCultureIgnoreCase))
@@ -93,11 +158,14 @@
         }
         return p?.Label;
     };
-    
+
     private void Reset()
     {
         _action = EnumPresentationAction.None;
         _selectedConnection = null;
+        _isWaitingForAcceptance = false;
+        _presentationIdWaitingForAcceptance = null;
+        _presentation = null;
     }
 
     private async Task ContinueWithPresentationRequest()
@@ -107,45 +175,52 @@
             return;
         }
 
-    // if (!_holderDidPasted!.StartsWith("did:prism:"))
-    // {
-    //     Snackbar.Add("The provided SubjectDID has to be a PRISM DID", Severity.Error);
-    //     return;
-    // }
-
         var presentationRequestResult = await PresentationService.CreatePresentationRequest(Agent, new PreparedPresentationRequest(
-            establishedConnection: _selectedConnection
-            ));
+            establishedConnection: _selectedConnection));
 
         if (presentationRequestResult.IsFailed)
         {
             Snackbar.Add(presentationRequestResult.Errors.First().Message, Severity.Error);
             return;
         }
-        
-        // Agent.AddCredentialOffer(presentationRequestResult.Value);
-        // await AgentService.Save(Agent);
+
         _isWaitingForAcceptance = true;
         StateHasChanged();
 
-        // var isParsedAsGuid = Guid.TryParse(presentationRequestResult.Value.RecordId, out var recordId);
-        // if (!isParsedAsGuid)
-        // {
-        //     Snackbar.Add("The record Id could not be parsed as GUID", Severity.Error);
-        //     return;
-        // }
-        // _recordIdWaitingForAcceptance = recordId;
+        var isParsedAsGuid = Guid.TryParse(presentationRequestResult.Value.PresentationId, out var presentationId);
+        if (!isParsedAsGuid)
+        {
+            Snackbar.Add("The presentation Id could not be parsed as GUID", Severity.Error);
+            return;
+        }
+        _presentationIdWaitingForAcceptance = presentationId;
 
-        // var acceptanceResult = await CredentialIssuingService.WaitForCredentialOfferAcceptance(Agent, _recordIdWaitingForAcceptance.Value, new CancellationToken());
-        // if (acceptanceResult.IsFailed)
-        // {
-        //     Snackbar.Add(acceptanceResult.Errors.First().Message, Severity.Error);
-        //     _action = EnumCredentialAction.TimeoutOrFailed;
-        //     return;
-        // }
-        //
-        // Parent.RefreshState();
-        // _isWaitingForAcceptance = false;
+        var acceptanceResult = await PresentationService.WaitForPresentationRequestAcceptance(Agent, _presentationIdWaitingForAcceptance.Value, new CancellationToken());
+        if (acceptanceResult.IsFailed)
+        {
+            Snackbar.Add(acceptanceResult.Errors.First().Message, Severity.Error);
+            _action = EnumPresentationAction.TimeoutOrFailed;
+            return;
+        }
+
+        acceptanceResult.Value.SetConnectionId(_selectedConnection.ConnectionId);
+
+        Parent.RefreshState();
+        _presentation = acceptanceResult.Value;
+        _isWaitingForAcceptance = false;
+        _action = EnumPresentationAction.Review;
     }
 
+    private async Task AcceptRejectPresentation(CreatedPresentationStatus presentation, bool acceptPresentation)
+    {
+        var acceptanceResult = await PresentationService.AcceptRejectPresentation(Agent, presentation.PresentationId,acceptPresentation);
+        if (acceptanceResult.IsFailed)
+        {
+            Snackbar.Add(acceptanceResult.Errors.First().Message, Severity.Error);
+            _action = EnumPresentationAction.TimeoutOrFailed;
+            return;
+        } 
+        
+        Reset();
+    }
 }

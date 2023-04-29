@@ -13,9 +13,9 @@
     <MudStack>
         <MudText Typo="Typo.subtitle2">Create new connection</MudText>
         <MudTextField Variant="Variant.Filled" T="string" Label="Name the connection (optional)" @bind-Value="CreateOobInvitationLabel"></MudTextField>
-        <MudButton Class="my-2" Variant="Variant.Filled" OnClick="CreateOobInvitation" StartIcon="@Icons.Material.Filled.QrCode">Create Out of Band invitation</MudButton>
+        <MudButton Class="my-2" Variant="Variant.Outlined" OnClick="CreateOobInvitation" StartIcon="@Icons.Material.Filled.QrCode">Create Out of Band invitation</MudButton>
         <MudDivider></MudDivider>
-        <MudButton Class="my-2" Variant="Variant.Filled" OnClick="ShowAcceptOobInvitation" StartIcon="@Icons.Material.Filled.QrCodeScanner">Accept Out of Band invitation</MudButton>
+        <MudButton Class="my-2" Variant="Variant.Outlined" OnClick="ShowAcceptOobInvitation" StartIcon="@Icons.Material.Filled.QrCodeScanner">Accept Out of Band invitation</MudButton>
     </MudStack>
 }
 else if (_action == EnumConnectionAction.InvitationGenerated)
@@ -62,9 +62,9 @@ else if (_action == EnumConnectionAction.ReadyToAcceptInvitation)
         <MudText Typo="Typo.body2">Paste the invitation here</MudText>
         <MudTextField @bind-Value="@InvitationLink" Label="Paste the invitation here" Style="font-weight:300;" Variant="Variant.Text"/>
         <MudStack Class="my-2" Row="true">
-            <MudButton Variant="Variant.Filled" OnClick="Reset">Cancel</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="Reset">Cancel</MudButton>
             <MudSpacer/>
-            <MudButton Variant="Variant.Filled" Disabled="String.IsNullOrEmpty(InvitationLink)" OnClick="AcceptOobInvitation" StartIcon="@Icons.Material.Filled.QrCodeScanner">Accept</MudButton>
+            <MudButton Variant="Variant.Outlined" Disabled="String.IsNullOrEmpty(InvitationLink)" OnClick="AcceptOobInvitation" StartIcon="@Icons.Material.Filled.QrCodeScanner">Accept</MudButton>
         </MudStack>
     </MudStack>
 }
@@ -163,7 +163,7 @@ else if (_action == EnumConnectionAction.ConnectionResponseSent)
         </div>
         <MudStack Row="true">
             <MudSpacer></MudSpacer>
-            <MudButton OnClick="Reset" Variant="Variant.Filled">Continue</MudButton>
+            <MudButton OnClick="Reset" Variant="Variant.Outlined">Ok</MudButton>
         </MudStack>
     </MudStack>
 }
@@ -212,7 +212,7 @@ else if (_action == EnumConnectionAction.ConnectionResponseReceived)
         @* <p> TODO: offer a field to name the connection!</p> *@
         <MudStack Row="true">
             <MudSpacer></MudSpacer>
-            <MudButton OnClick="Reset" Variant="Variant.Filled">Continue</MudButton>
+            <MudButton OnClick="Reset" Variant="Variant.Outlined">Ok</MudButton>
         </MudStack>
     </MudStack>
 }

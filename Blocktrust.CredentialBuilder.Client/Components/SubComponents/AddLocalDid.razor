@@ -16,7 +16,7 @@
             <MudText Typo="Typo.subtitle2">
                 Create new DID
             </MudText>
-            <MudButton Class="my-2" Variant="Variant.Filled" OnClick="CreateUnpublishedDid" StartIcon="@Icons.Material.Filled.PermIdentity">Create new unpublished DID</MudButton>
+            <MudButton Class="my-2" Variant="Variant.Outlined" OnClick="CreateUnpublishedDid" StartIcon="@Icons.Material.Filled.PermIdentity">Create new unpublished DID</MudButton>
         </MudStack>
     }
     @if (_action == EnumDidAction.LocalDidCreated)
@@ -45,9 +45,9 @@
             @if (!IsPublishing)
             {
                 <MudStack Row="true">
-                    <MudButton OnClick="Reset" Variant="Variant.Filled">Cancel</MudButton>
+                    <MudButton OnClick="Reset" Variant="Variant.Outlined">Cancel</MudButton>
                     <MudSpacer></MudSpacer>
-                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Create" OnClick="PublishDid">Publish</MudButton>
+                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Create" OnClick="PublishDid">Publish</MudButton>
                 </MudStack>
             }
             else
@@ -100,7 +100,7 @@
             </MudStack>
             <MudStack Row="true">
                 <MudSpacer></MudSpacer>
-                <MudButton OnClick="Reset" Variant="Variant.Filled">Continue</MudButton>
+                <MudButton OnClick="Reset" Variant="Variant.Outlined">Continue</MudButton>
             </MudStack>
         </MudStack>
     }

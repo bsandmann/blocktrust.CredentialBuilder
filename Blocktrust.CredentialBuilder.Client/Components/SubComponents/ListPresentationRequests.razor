@@ -1,0 +1,62 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Models
+@using Blocktrust.CredentialBuilder.Client.Components.Helpers
+@using Blocktrust.CredentialBuilder.Client.Models.Connections
+@using Blocktrust.CredentialBuilder.Client.Models.Credentials
+@using Blocktrust.CredentialBuilder.Client.Models.Dids
+@using Blocktrust.CredentialBuilder.Client.Models.Presentations
+@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.PrismAgentApi.Model
+@inject IPresentationService PresentationService
+@inject ISnackbar Snackbar
+
+<div class="pt-5 px-3 pb-3">
+    <MudStack Row="true" Class="mb-3">
+        <MudText Typo="Typo.subtitle2">
+            @Title <br/>
+            <em>(received over lifetime)</em>
+        </MudText>
+        <MudSpacer/>
+        <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Refresh" @onclick="RefreshPresentationRequestsList"></MudIconButton>
+    </MudStack>
+    @foreach (var presentation in PresentationStatusList)
+    {
+        <CascadingValue Value="this">
+            <PresentationRequestDetail Agent="Agent" Presentation="presentation"/>
+        </CascadingValue>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public Agent Agent { get; set; }
+
+    [Parameter]
+    public int? TimeSpanOfListingInMinutes { get; set; }
+
+    [Parameter]
+    public PresentationStatus.StatusEnum? PresentationStatus { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+
+    public List<CreatedPresentationStatus> PresentationStatusList { get; set; } = new List<CreatedPresentationStatus>();
+
+    private async Task RefreshPresentationRequestsList()
+    {
+        var listPresentationRequestResult = await PresentationService.GetListPresentationRequests(Agent, PresentationStatus);
+        if (listPresentationRequestResult.IsFailed)
+        {
+            Snackbar.Add(listPresentationRequestResult.Errors.First().Message, Severity.Error);
+            return;
+        }
+        PresentationStatusList = listPresentationRequestResult.Value;
+    }
+
+    public async Task RefreshState()
+    {
+        await RefreshPresentationRequestsList();
+        this.StateHasChanged();
+    }
+
+}

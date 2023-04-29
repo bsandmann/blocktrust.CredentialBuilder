@@ -3,4 +3,6 @@
 public enum EnumPresentationAction
 {
     None,
+    Review,
+    TimeoutOrFailed,
 }
