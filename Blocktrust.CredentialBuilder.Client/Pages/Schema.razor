@@ -1,0 +1,26 @@
+﻿@page "/Schema"
+@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Models
+@using Blocktrust.CredentialBuilder.Client.Components
+@inject IAgentService AgentService
+@inject ISnackbar Snackbar
+
+<PageTitle>Blocktrust.CredentialBuilder</PageTitle>
+<MudStack>
+    <p>schema</p>
+</MudStack>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AgentService.GetAgents();
+    }
+
+
+    public void RefreshState()
+    {
+        this.StateHasChanged();
+    }
+
+}
