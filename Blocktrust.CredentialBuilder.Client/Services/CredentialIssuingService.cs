@@ -6,6 +6,7 @@ using Models.Credentials;
 using Models.Dids;
 using PrismAgentApi.Client;
 using PrismAgentApi.Model;
+using static Blocktrust.PrismAgentApi.Model.IssueCredentialRecordAllOf;
 
 public class CredentialIssuingService : ICredentialIssuingService
 {
@@ -18,23 +19,32 @@ public class CredentialIssuingService : ICredentialIssuingService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
+
+
             var response = await issueCredentialsProtocolApi.CreateCredentialOfferAsync(
                 new CreateIssueCredentialRecordRequest(
-                    schemaId: preparedCredential.SchemaId,
-                    validityPeriod: 0M,
+                    //schemaId: preparedCredential.SchemaId,
+                    validityPeriod: (double)0M,
                     claims: preparedCredential.Claims,
                     automaticIssuance: preparedCredential.AutomaticIssuance,
                     issuingDID: preparedCredential.IssuerDid.Did,
                     connectionId: preparedCredential.EstablishedConnection.ConnectionId.ToString()));
+
+            if (!Enum.TryParse<IssueCredentialRecordAllOf.ProtocolStateEnum>(response.ProtocolState, out var protocolStateEnum))
+            {
+                return Result.Fail("Error parsing string as ProtocolStateEnum");
+
+            }
+
             var createdCredential = new CreatedCredentialOffer(
                 recordId: response.RecordId,
-                protocolState: response.ProtocolState,
+                protocolState: protocolStateEnum,
                 issuerDid: preparedCredential.IssuerDid.Did, // ATTENTION: This value currently comes from the prepared credential, but it should come from the response (I believe)
                 subjectDid: null,
                 claims: response.Claims,
                 automaticIssuance: response.AutomaticIssuance,
-                schemaId: response.SchemaId,
-                validityPeriod: response.ValidityPeriod,
+                //schemaId: response.SchemaId,
+                validityPeriod: (decimal?)response.ValidityPeriod,
                 createdAt: response.CreatedAt,
                 jwtCredential: Base64ToJwtDecoder(response.JwtCredential),
                 savedLocally: false);
@@ -46,7 +56,7 @@ public class CredentialIssuingService : ICredentialIssuingService
         }
     }
 
-    public async Task<Result<List<CreatedCredentialOffer>>> GetListCredentials(Agent agent, IssueCredentialRecord.ProtocolStateEnum expectedState, TimeSpan? timeSpanOfListing = null)
+    public async Task<Result<List<CreatedCredentialOffer>>> GetListCredentials(Agent agent, IssueCredentialRecordAllOf.ProtocolStateEnum expectedState, TimeSpan? timeSpanOfListing = null)
     {
         Blocktrust.PrismAgentApi.Api.IssueCredentialsProtocolApi issueCredentialsProtocolApi = new Blocktrust.PrismAgentApi.Api.IssueCredentialsProtocolApi(
             configuration: new Configuration(defaultHeaders: new Dictionary<string, string>() { { "apiKey", agent.AgentApiKey } },
@@ -56,33 +66,41 @@ public class CredentialIssuingService : ICredentialIssuingService
         try
         {
             var response = await issueCredentialsProtocolApi.GetCredentialRecordsAsync();
+
+
             //TODO paging!
             var listReceivedCredentialOffers = new List<CreatedCredentialOffer>();
             IEnumerable<IssueCredentialRecord> filteredList;
             if (timeSpanOfListing is null)
             {
                 filteredList = response.Contents
-                    .Where(p => p.ProtocolState == expectedState)
+                    .Where(p => string.Equals(p.ProtocolState, expectedState.ToString(), StringComparison.CurrentCultureIgnoreCase))
                     .OrderByDescending(p => p.CreatedAt);
             }
             else
             {
                 filteredList = response.Contents
-                    .Where(p => p.ProtocolState == expectedState && p.CreatedAt > DateTime.UtcNow - timeSpanOfListing)
+                    .Where(p => string.Equals(p.ProtocolState, expectedState.ToString(), StringComparison.CurrentCultureIgnoreCase) && p.CreatedAt > DateTime.UtcNow - timeSpanOfListing)
                     .OrderByDescending(p => p.CreatedAt);
             }
 
             foreach (var content in filteredList)
             {
+                if (!Enum.TryParse<IssueCredentialRecordAllOf.ProtocolStateEnum>(content.ProtocolState, out var protocolStateEnum))
+                {
+                    return Result.Fail("Error parsing string as ProtocolStateEnum");
+
+                }
+
                 var receivedCredentialOffer = new CreatedCredentialOffer(
                     recordId: content.RecordId,
-                    protocolState: content.ProtocolState,
+                    protocolState: protocolStateEnum,
                     issuerDid: content.IssuingDID,
                     subjectDid: content.SubjectId,
                     claims: content.Claims,
                     automaticIssuance: content.AutomaticIssuance,
-                    schemaId: content.SchemaId,
-                    validityPeriod: content.ValidityPeriod,
+                    //schemaId: content.,
+                    validityPeriod: (decimal?)content.ValidityPeriod,
                     createdAt: content.CreatedAt,
                     jwtCredential: Base64ToJwtDecoder(content.JwtCredential),
                     savedLocally: false);
@@ -113,21 +131,28 @@ public class CredentialIssuingService : ICredentialIssuingService
         async Task OnTimerElapsedAsync(object state)
         {
             attempts++;
-            var response = await issueCredentialsProtocolApi.GetCredentialRecordAsync(credentialRecordId, cancellationToken);
-            if (response.ProtocolState == IssueCredentialRecord.ProtocolStateEnum.CredentialSent)
+            var response = await issueCredentialsProtocolApi.GetCredentialRecordAsync(credentialRecordId.ToString(), cancellationToken);
+
+            if (!Enum.TryParse<IssueCredentialRecordAllOf.ProtocolStateEnum>(response.ProtocolState, out var protocolStateEnum))
+            {
+                return;
+
+            }
+
+            if (protocolStateEnum == IssueCredentialRecordAllOf.ProtocolStateEnum.CredentialSent)
             {
                 // not really a nice solutions, since we have the created offer already in the db
                 var receivedCredentialOffer = new CreatedCredentialOffer(
                     recordId: response.RecordId,
-                    protocolState: response.ProtocolState,
+                    protocolState: protocolStateEnum,
                     issuerDid: response.IssuingDID,
                     subjectDid: response.SubjectId,
                     claims: response.Claims,
                     automaticIssuance: response.AutomaticIssuance,
-                    schemaId: response.SchemaId,
-                    validityPeriod: response.ValidityPeriod,
+                    //schemaId: response.SchemaId,
+                    validityPeriod: (decimal?) response.ValidityPeriod,
                     createdAt: response.CreatedAt,
-                    jwtCredential: Base64ToJwtDecoder(response.JwtCredential), 
+                    jwtCredential: Base64ToJwtDecoder(response.JwtCredential),
                     savedLocally: false);
                 tcs.TrySetResult(Result.Ok(receivedCredentialOffer));
             }
@@ -175,16 +200,23 @@ public class CredentialIssuingService : ICredentialIssuingService
                 createdCredentialOffer.SubjectDid = subjectDid.Did;
             }
 
-            var response = await issueCredentialsProtocolApi.AcceptCredentialOfferAsync(recordId, new AcceptCredentialOfferRequest(createdCredentialOffer.SubjectDid));
+            var response = await issueCredentialsProtocolApi.AcceptCredentialOfferAsync(recordId.ToString(), new AcceptCredentialOfferRequest(createdCredentialOffer.SubjectDid));
+
+            if (!Enum.TryParse<IssueCredentialRecordAllOf.ProtocolStateEnum>(response.ProtocolState, out var protocolStateEnum))
+            {
+                return Result.Fail("Error parsing string as ProtocolStateEnum");
+
+            }
+
             var createdCredential = new CreatedCredentialOffer(
                 recordId: response.RecordId,
-                protocolState: response.ProtocolState,
+                protocolState: protocolStateEnum,
                 issuerDid: response.IssuingDID,
                 subjectDid: subjectDid.Did,
                 claims: response.Claims,
                 automaticIssuance: response.AutomaticIssuance,
-                schemaId: response.SchemaId,
-                validityPeriod: response.ValidityPeriod,
+                //schemaId: response.SchemaId,
+                validityPeriod: (decimal?)response.ValidityPeriod,
                 createdAt: response.CreatedAt,
                 jwtCredential: Base64ToJwtDecoder(response.JwtCredential),
                 savedLocally: false);

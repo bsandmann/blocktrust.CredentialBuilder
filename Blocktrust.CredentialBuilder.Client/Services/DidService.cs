@@ -17,17 +17,17 @@ public class DidService : IDidService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
-            var response = await didRegistrarApi.CreateManagedDidAsync(new CreateManagedDidRequest(
+            var response = await didRegistrarApi.PostDidRegistrarDidsAsync((new CreateManagedDidRequest(
                 new CreateManagedDidRequestDocumentTemplate(
                     new List<ManagedDIDKeyTemplate>()
                     {
-                        new ManagedDIDKeyTemplate(id: "key-1", purpose: ManagedDIDKeyTemplate.PurposeEnum.Authentication),
-                        new ManagedDIDKeyTemplate(id: "key-2", purpose: ManagedDIDKeyTemplate.PurposeEnum.KeyAgreement),
-                        new ManagedDIDKeyTemplate(id: "key-3", purpose: ManagedDIDKeyTemplate.PurposeEnum.AssertionMethod),
+                        new ManagedDIDKeyTemplate(id: "key-1", purpose: Purpose.Authentication),
+                        new ManagedDIDKeyTemplate(id: "key-2", purpose: Purpose.KeyAgreement),
+                        new ManagedDIDKeyTemplate(id: "key-3", purpose: Purpose.AssertionMethod),
                     }, new List<Service>()
                     {
-                        new Service(id:"service-1", type: Service.TypeEnum.LinkedDomains, serviceEndpoint: new List<string>() { "https://some.service" })
-                    })));
+                        new Service(id:"service-1", type: UpdateManagedDIDRequestActionsInnerUpdateService.TypeEnum.LinkedDomains.ToString(), serviceEndpoint: new List<string>() { "https://some.service" })
+                    }))));
             return Result.Ok(new LocalDid(response.LongFormDid));
         }
         catch (Exception e)
@@ -45,7 +45,7 @@ public class DidService : IDidService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
-            var response = await didRegistrarApi.PublishManagedDidAsync(localDid.Did);
+            var response = await didRegistrarApi.PostDidRegistrarDidsDidrefPublicationsAsync(localDid.Did);
             localDid.Published();
             return Result.Ok(localDid);
         }
@@ -54,14 +54,14 @@ public class DidService : IDidService
             return Result.Fail(e.Message);
         }
     }
-    
-      public async Task<Result<ManagedDID.StatusEnum>> WaitForPublishedDid(Agent agent, LocalDid did, CancellationToken cancellationToken)
+
+    public async Task<Result<string>> WaitForPublishedDid(Agent agent, LocalDid did, CancellationToken cancellationToken)
     {
         int attempts = 0;
-        var tcs = new TaskCompletionSource<Result<ManagedDID.StatusEnum>>();
-        
+        var tcs = new TaskCompletionSource<Result<string>>();
+
         cancellationToken.Register(() => tcs.TrySetCanceled());
-        
+
         Blocktrust.PrismAgentApi.Api.DIDRegistrarApi didRegistrarApi = new Blocktrust.PrismAgentApi.Api.DIDRegistrarApi(
             configuration: new Configuration(defaultHeaders: new Dictionary<string, string>() { { "apiKey", agent.AgentApiKey } },
                 apiKey: new Dictionary<string, string>() { },
@@ -71,8 +71,8 @@ public class DidService : IDidService
         async Task OnTimerElapsedAsync(object state)
         {
             attempts++;
-            var response = await didRegistrarApi.GetManagedDidAsync(did.Did, cancellationToken);
-            if (response.Status == ManagedDID.StatusEnum.PUBLISHED)
+            var response = await didRegistrarApi.GetDidRegistrarDidsDidrefAsync(did.Did, cancellationToken);
+            if (response.Status.Equals("PUBLISHED", StringComparison.CurrentCultureIgnoreCase))
             {
                 tcs.TrySetResult(Result.Ok(response.Status));
             }
@@ -87,7 +87,7 @@ public class DidService : IDidService
             // Call the async local function and ignore the returned task.
             _ = OnTimerElapsedAsync(state);
         }
-        
+
         using Timer timer = new Timer(OnTimerElapsed, null, 0, GlobalSettings.Interval);
 
         try
