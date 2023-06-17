@@ -31,7 +31,11 @@ public class PresentationService : IPresentationService
             var response = await presentProofApi.RequestPresentationAsync(
                 new RequestPresentationInput(
                     connectionId: presentationRequest.EstablishedConnection.ConnectionId.ToString(),
-                    proofs: new List<ProofRequestAux>(),
+                    proofs: new List<ProofRequestAux>()
+                    {
+                        // new ProofRequestAux(schemaId: "be2ff82d-1fe6-4e2f-9dd7-6a867fe9534A",
+                        //     trustIssuers: new List<string>(){"did:prism:23474572306bc10f4f289d4d3a737fa6bd79e5b4081409f83ca16390a1c3cb6f"})
+                    },
                     options: new Options(
                         challenge: Guid.NewGuid().ToString(),
                         domain: agent.AgentInstanceUri.AbsoluteUri)
