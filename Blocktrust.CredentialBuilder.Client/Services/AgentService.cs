@@ -1,17 +1,23 @@
 ﻿namespace Blocktrust.CredentialBuilder.Client.Services;
 
+using System.Text;
+using System.Text.Json;
 using FluentResults;
 using Models;
+using Models.System;
 
 public class AgentService : IAgentService
 {
     public Agents? AgentsInMemory { get; set; }
     public IStorageService StorageService { get; set; }
 
+    private readonly HttpClient _httpClient;
 
-    public AgentService(IStorageService storageService)
+
+    public AgentService(IStorageService storageService, HttpClient httpClient)
     {
         StorageService = storageService;
+        _httpClient = httpClient;
     }
 
     private async Task<Result> LoadAgentsFromStorage()
@@ -144,5 +150,29 @@ public class AgentService : IAgentService
 
         await GetAgents();
         return Result.Ok();
+    }
+
+    public async Task<Result<string>> GetVersion(Agent agent)
+    {
+        var url = string.Concat(agent.AgentInstanceUri.AbsoluteUri, "/_system/health");
+        try
+        {
+            // add headers
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("apiKey", agent.AgentApiKey);
+            var response = await _httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result.Fail(response.ReasonPhrase);
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var health = JsonSerializer.Deserialize<HealthModel>(content);
+            return Result.Ok(health.Version);
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(e.Message);
+        }
     }
 }

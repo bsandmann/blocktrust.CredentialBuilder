@@ -1,6 +1,6 @@
 ﻿namespace Blocktrust.CredentialBuilder.Client.Models.Connections;
 
-using System.Text.Json.Serialization;
+using global::System.Text.Json.Serialization;
 using Net.Codecrete.QrCodeGenerator;
 
 public class OobInvitation

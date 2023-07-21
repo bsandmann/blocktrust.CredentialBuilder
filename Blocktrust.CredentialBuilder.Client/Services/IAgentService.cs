@@ -13,4 +13,5 @@ public interface IAgentService
 
     Task<Result> Save(Agent agent);
     Task<Result> DeleteAgent(Agent agent);
+    Task<Result<string>> GetVersion(Agent agent);
 }
