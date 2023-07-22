@@ -1,6 +1,6 @@
 ﻿namespace Blocktrust.CredentialBuilder.Client.Models.Connections;
 
-using System.Text.Json.Serialization;
+using global::System.Text.Json.Serialization;
 using MudBlazor;
 using Net.Codecrete.QrCodeGenerator;
 using PrismAgentApi.Model;

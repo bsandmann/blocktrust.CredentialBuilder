@@ -9,8 +9,8 @@
 <PageTitle>Blocktrust.CredentialBuilder</PageTitle>
 <MudStack>
 
-<MudText>Not yet supported</Mudtext>
-    @*<MudButton OnClick="GetSchemas">Get Schemas</MudButton>*@
+<MudText>Not yet supported</MudText>
+    <MudButton OnClick="GetSchemas">Get Schemas</MudButton>
 </MudStack>
 
 @code {
@@ -23,16 +23,16 @@
 
     private void GetSchemas()
     {
-    //    Agent? someAgent = null;
-    //    if (AgentService is not null && AgentService.AgentsInMemory is not null)
-    //    {
-    //        someAgent = AgentService.AgentsInMemory.List.Skip(0).FirstOrDefault();
-    //    }
-    //    if (someAgent is null)
-    //    {
-    ////TODO 
-    //    }
-    //    var r = SchemaService.GetListSchemas(someAgent!);
+        Agent? someAgent = null;
+        if (AgentService is not null && AgentService.AgentsInMemory is not null)
+        {
+            someAgent = AgentService.AgentsInMemory.List.Skip(0).FirstOrDefault();
+        }
+        if (someAgent is null)
+        {
+    //TODO 
+        }
+        var r = SchemaService.GetListSchemas(someAgent!);
     }
 
 }

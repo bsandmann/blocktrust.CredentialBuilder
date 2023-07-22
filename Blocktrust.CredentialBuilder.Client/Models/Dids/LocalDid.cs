@@ -1,6 +1,6 @@
 ﻿namespace Blocktrust.CredentialBuilder.Client.Models.Dids;
 
-using System.Text.Json.Serialization;
+using global::System.Text.Json.Serialization;
 using Services;
 
 public class LocalDid

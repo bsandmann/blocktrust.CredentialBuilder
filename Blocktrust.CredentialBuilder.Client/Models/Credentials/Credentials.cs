@@ -1,6 +1,6 @@
 ﻿namespace Blocktrust.CredentialBuilder.Client.Models.Credentials;
 
-using System.Text.Json.Serialization;
+using global::System.Text.Json.Serialization;
 
 public class Credentials
 {

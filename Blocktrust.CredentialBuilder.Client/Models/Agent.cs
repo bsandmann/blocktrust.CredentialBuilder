@@ -1,9 +1,9 @@
 ﻿namespace Blocktrust.CredentialBuilder.Client.Models;
 
-using System.Text.Json.Serialization;
 using Connections;
 using Credentials;
 using Dids;
+using global::System.Text.Json.Serialization;
 
 public class Agent
 {
