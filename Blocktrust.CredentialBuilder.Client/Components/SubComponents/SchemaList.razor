@@ -1,0 +1,105 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Models
+@using Blocktrust.CredentialBuilder.Client.Pages
+@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.PrismAgentApi.Model
+@inject IAgentService AgentService
+@inject ISchemaService SchemaService
+@inject ISnackbar Snackbar
+
+<MudPaper Class="mr-2 mt-4 pa-3" Style="width: 449px; height: fit-content;">
+    <MudSelect T="Agent" ValueChanged="OnSelectAgentValueChanged" Value="_selectedAgent" ToStringFunc="@_agentConverter" Label="Agent" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" Class="mb-3">
+        @if (AgentService is not null && AgentService.AgentsInMemory is not null && AgentService.AgentsInMemory.List.Any())
+        {
+            @foreach (var agent in AgentService.AgentsInMemory.List)
+            {
+                <MudSelectItem Value="agent"></MudSelectItem>
+            }
+        }
+    </MudSelect>
+    @if (_selectedAgent is null)
+    {
+        // don't show anything
+    }
+    else if (!availableSchemasInAgent.Any())
+    {
+        <MudAlert Severity="Severity.Info">
+            No schemas available on
+            @if (!string.IsNullOrEmpty(_selectedAgent.AgentName))
+            {
+                <em>@_selectedAgent.AgentName</em>
+            }
+            else
+            {
+                <em>@_selectedAgent.AgentInstanceUri.AbsoluteUri</em>
+            }
+        </MudAlert>
+    }
+    else
+    {
+        <MudList Clickable="true">
+            @foreach (var schema in availableSchemasInAgent)
+            {
+                <MudListItem OnClick="() => OnSelectSchema(schema)">
+                    <MudStack>
+                        <MudText Typo="Typo.body2">@schema.Name</MudText>
+                        <MudText Typo="Typo.caption">@schema.Description</MudText>
+                    </MudStack>
+                </MudListItem>
+            }
+        </MudList>
+    }
+</MudPaper>
+
+@code {
+    Agent? _selectedAgent = null;
+    List<CredentialSchemaResponse> availableSchemasInAgent = new List<CredentialSchemaResponse>();
+    Func<Agent, string?> _agentConverter = p => (p.AgentName is not null) ? p.AgentName : p.AgentInstanceUri.AbsoluteUri;
+
+    [CascadingParameter]
+    public Schema Parent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AgentService.GetAgents();
+        if (AgentService is not null && AgentService.AgentsInMemory is not null && AgentService.AgentsInMemory.List.Any())
+        {
+            _selectedAgent = AgentService.AgentsInMemory.List.FirstOrDefault();
+            await UpdateSchemaList();
+            if (_selectedAgent is not null)
+            {
+                Parent.SetAgent(_selectedAgent);
+            }
+        }
+    }
+
+    private async Task OnSelectAgentValueChanged(Agent agent)
+    {
+        _selectedAgent = agent;
+        await UpdateSchemaList();
+        Parent.SetAgent(agent);
+    }
+
+
+    private async Task UpdateSchemaList()
+    {
+        if (_selectedAgent is not null)
+        {
+            var schemaList = await SchemaService.GetListSchemas(_selectedAgent);
+            if (schemaList.IsFailed)
+            {
+                Snackbar.Add(schemaList.Errors.First().Message, Severity.Error);
+            }
+            else
+            {
+                availableSchemasInAgent = schemaList.Value;
+            }
+        }
+    }
+
+
+    private void OnSelectSchema(CredentialSchemaResponse schema)
+    {
+        Parent.SetSchema(schema);
+    }
+
+}

@@ -2,8 +2,9 @@
 
 using FluentResults;
 using Models;
+using PrismAgentApi.Model;
 
 public interface ISchemaService
 {
-    Task<Result> GetListSchemas(Agent agent);
+    Task<Result<List<CredentialSchemaResponse>>> GetListSchemas(Agent agent, string? author = null, string? name = null, string? version = null, string? tags = null);
 }
