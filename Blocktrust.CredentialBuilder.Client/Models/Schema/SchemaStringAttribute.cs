@@ -26,7 +26,7 @@ public class SchemaStringAttribute : ISchemaAttribute
         if (formatToken is not null && formatToken.Type == JTokenType.String)
         {
             var formatString = formatToken.Value<string>();
-            var parseResult = System.Enum.TryParse<EnumSchemaStringFormat>(formatString, ignoreCase: true, out var format);
+            var parseResult = EnumSchemaStringFormat.TryParse<EnumSchemaStringFormat>(formatString, ignoreCase: true, out var format);
             if (parseResult)
             {
                 Format = format;

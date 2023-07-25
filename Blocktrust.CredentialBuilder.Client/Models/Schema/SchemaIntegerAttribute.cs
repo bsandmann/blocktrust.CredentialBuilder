@@ -27,7 +27,7 @@ public class SchemaIntegerAttribute : ISchemaAttribute
         if (formatToken is not null && formatToken.Type == JTokenType.String)
         {
             var formatString = formatToken.Value<string>();
-            var parseResult = System.Enum.TryParse<EnumSchemaIntegerFormat>(formatString, ignoreCase: true, out var format);
+            var parseResult = EnumSchemaIntegerFormat.TryParse<EnumSchemaIntegerFormat>(formatString, ignoreCase: true, out var format);
             if (parseResult)
             {
                 Format = format;
