@@ -19,8 +19,6 @@ public class CredentialIssuingService : ICredentialIssuingService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
-
-
             var response = await issueCredentialsProtocolApi.CreateCredentialOfferAsync(
                 new CreateIssueCredentialRecordRequest(
                     //schemaId: preparedCredential.SchemaId,
@@ -33,7 +31,6 @@ public class CredentialIssuingService : ICredentialIssuingService
             if (!Enum.TryParse<IssueCredentialRecordAllOf.ProtocolStateEnum>(response.ProtocolState, out var protocolStateEnum))
             {
                 return Result.Fail("Error parsing string as ProtocolStateEnum");
-
             }
 
             var createdCredential = new CreatedCredentialOffer(
@@ -67,7 +64,6 @@ public class CredentialIssuingService : ICredentialIssuingService
         {
             var response = await issueCredentialsProtocolApi.GetCredentialRecordsAsync();
 
-
             //TODO paging!
             var listReceivedCredentialOffers = new List<CreatedCredentialOffer>();
             IEnumerable<IssueCredentialRecord> filteredList;
@@ -89,7 +85,6 @@ public class CredentialIssuingService : ICredentialIssuingService
                 if (!Enum.TryParse<IssueCredentialRecordAllOf.ProtocolStateEnum>(content.ProtocolState, out var protocolStateEnum))
                 {
                     return Result.Fail("Error parsing string as ProtocolStateEnum");
-
                 }
 
                 var receivedCredentialOffer = new CreatedCredentialOffer(
@@ -136,7 +131,6 @@ public class CredentialIssuingService : ICredentialIssuingService
             if (!Enum.TryParse<IssueCredentialRecordAllOf.ProtocolStateEnum>(response.ProtocolState, out var protocolStateEnum))
             {
                 return;
-
             }
 
             if (protocolStateEnum == IssueCredentialRecordAllOf.ProtocolStateEnum.CredentialSent)
@@ -150,7 +144,7 @@ public class CredentialIssuingService : ICredentialIssuingService
                     claims: response.Claims,
                     automaticIssuance: response.AutomaticIssuance,
                     //schemaId: response.SchemaId,
-                    validityPeriod: (decimal?) response.ValidityPeriod,
+                    validityPeriod: (decimal?)response.ValidityPeriod,
                     createdAt: response.CreatedAt,
                     jwtCredential: Base64ToJwtDecoder(response.JwtCredential),
                     savedLocally: false);
@@ -205,7 +199,6 @@ public class CredentialIssuingService : ICredentialIssuingService
             if (!Enum.TryParse<IssueCredentialRecordAllOf.ProtocolStateEnum>(response.ProtocolState, out var protocolStateEnum))
             {
                 return Result.Fail("Error parsing string as ProtocolStateEnum");
-
             }
 
             var createdCredential = new CreatedCredentialOffer(
