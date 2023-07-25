@@ -1,0 +1,71 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Models
+@using Blocktrust.CredentialBuilder.Client.Models.Connections
+@using Blocktrust.CredentialBuilder.Client.Components.Helpers
+@using Blocktrust.CredentialBuilder.Client.Services
+@using System.Data.Common
+@using Blocktrust.CredentialBuilder.Client.Models.Credentials
+@using Blocktrust.CredentialBuilder.Client.Models.Dids
+@using Blocktrust.CredentialBuilder.Client.Models.Schema
+@using Blocktrust.PrismAgentApi.Model
+@inject IConnectionService ConnectionService;
+@inject ISnackbar Snackbar
+@inject IAgentService AgentService;
+@inject ICredentialIssuingService CredentialIssuingService;
+
+<MudPaper Class="mr-2 mt-4 pa-3" Style="width: 916px; height: fit-content;">
+    <MudStack>
+        <MudText Typo="Typo.h5">@JsonSchema.Name</MudText>
+        <MudText Typo="Typo.body2">@JsonSchema.Description</MudText>
+        <MudText Typo="Typo.caption">Schema Id: @JsonSchema.Id</MudText>
+        <MudText Typo="Typo.caption">Resource Id: @JsonSchema.LongId</MudText>
+        <MudText Typo="Typo.caption">Version: @JsonSchema.Version</MudText>
+        <MudStack Row="true">
+            <MudText Typo="Typo.caption">Tags: </MudText>
+            @foreach (var tag in JsonSchema.Tags)
+            {
+                <MudText Typo="Typo.caption">@tag</MudText>
+            }
+        </MudStack>
+    </MudStack>
+    <MudDivider/>
+    @foreach (var schemaAttribute in JsonSchema.JsonSchemaDefintion.Attributes)
+    {
+        <MudPaper>
+            <MudStack>
+                <MudText Typo="Typo.body2">@schemaAttribute.Key</MudText>
+                @{
+                    if (schemaAttribute.Value.GetType() == typeof(SchemaStringAttribute))
+                    {
+                        <div>is string</div>
+                    }
+                    else if (schemaAttribute.Value.GetType() == typeof(SchemaIntegerAttribute))
+                    {
+                        <div>is integer</div>
+                    }
+                    else if (schemaAttribute.Value.GetType() == typeof(SchemaNumberAttribute))
+                    {
+                        <div>is number</div>
+                    }
+                    else if (schemaAttribute.Value.GetType() == typeof(SchemaArrayAttribute))
+                    {
+                        <div>is array</div>
+                    }
+                    else if (schemaAttribute.Value.GetType() == typeof(SchemaObjectAttribute))
+                    {
+                        <div>is object</div>
+                    }
+                }
+            </MudStack>
+        </MudPaper>
+    }
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public Agent Agent { get; set; }
+
+    [Parameter]
+    public JsonSchema JsonSchema { get; set; }
+
+}

@@ -7,7 +7,7 @@ using FluentResults;
 
 public class SchemaService : ISchemaService
 {
-    public async Task<Result> GetListSchemas(Agent agent)
+    public async Task<Result<List<CredentialSchemaResponse>>> GetListSchemas(Agent agent, string? author = null, string? name = null, string? version = null, string? tags = null)
     {
         Blocktrust.PrismAgentApi.Api.SchemaRegistryApi schemaRegistryApi = new Blocktrust.PrismAgentApi.Api.SchemaRegistryApi(
             configuration: new Configuration(defaultHeaders: new Dictionary<string, string>() { { "apiKey", agent.AgentApiKey } },
@@ -16,11 +16,9 @@ public class SchemaService : ISchemaService
                 basePath: agent.AgentInstanceUri.AbsoluteUri));
         try
         {
-            var response = await schemaRegistryApi.LookupSchemasByQueryAsync();
-            // var createdPresentationRequest = new CreatedPresentationRequest(
-            //     presentationId: response.PresentationId
-            // );
-            return Result.Ok();
+            //TODO pagination
+            var response = await schemaRegistryApi.LookupSchemasByQueryAsync(author: author, name: name, version: version, tags: tags);
+            return Result.Ok(response.Contents);
         }
         catch (Exception e)
         {
