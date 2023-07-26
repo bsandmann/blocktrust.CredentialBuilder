@@ -14,7 +14,7 @@
 @inject IAgentService AgentService;
 @inject ICredentialIssuingService CredentialIssuingService;
 
-<MudPaper Class="mr-2 mt-4 pa-3" Style="width: 449px; height: fit-content;">
+<MudPaper Class="mr-2 pa-3 mt-4" Style="width: 449px; height: fit-content;">
     <MudStack>
         <MudText Typo="Typo.h5">@JsonSchema.Name</MudText>
         <MudText Typo="Typo.body2">@JsonSchema.Description</MudText>
@@ -25,7 +25,7 @@
             <strong>Version:</strong> @JsonSchema.Version
         </MudText>
         <MudText Typo="Typo.caption">
-            <strong>Ressource Id:</strong> 
+            <strong>Ressource Id:</strong>
             <span style="word-break: break-all">
                 @JsonSchema.LongId
             </span>
@@ -77,38 +77,44 @@
                         if (schemaAttribute.Value.GetType() == typeof(SchemaStringAttribute))
                         {
                             var schemaStringAttribute = schemaAttribute.Value as SchemaStringAttribute;
-                            <SchemaDetailString schemaStringAttribute="@schemaStringAttribute"></SchemaDetailString> 
+                            <SchemaDetailString schemaStringAttribute="@schemaStringAttribute"></SchemaDetailString>
                         }
                         else if (schemaAttribute.Value.GetType() == typeof(SchemaIntegerAttribute))
                         {
                             var schemaIntegerAttribute = schemaAttribute.Value as SchemaIntegerAttribute;
-                            <SchemaDetailInteger schemaIntegerAttribute="@schemaIntegerAttribute"></SchemaDetailInteger> 
+                            <SchemaDetailInteger schemaIntegerAttribute="@schemaIntegerAttribute"></SchemaDetailInteger>
                         }
                         else if (schemaAttribute.Value.GetType() == typeof(SchemaNumberAttribute))
                         {
                             var schemaNumberAttribute = schemaAttribute.Value as SchemaNumberAttribute;
-                            <SchemaDetailNumber schemaNumberAttribute="@schemaNumberAttribute"></SchemaDetailNumber> 
+                            <SchemaDetailNumber schemaNumberAttribute="@schemaNumberAttribute"></SchemaDetailNumber>
                         }
                         else if (schemaAttribute.Value.GetType() == typeof(SchemaArrayAttribute))
                         {
                             var schemaArrayAttribute = schemaAttribute.Value as SchemaArrayAttribute;
-                            <SchemaDetailArray schemaArrayAttribute="@schemaArrayAttribute"></SchemaDetailArray> 
+                            <SchemaDetailArray schemaArrayAttribute="@schemaArrayAttribute"></SchemaDetailArray>
                         }
                         else if (schemaAttribute.Value.GetType() == typeof(SchemaObjectAttribute))
                         {
                             var schemaObjectAttribute = schemaAttribute.Value as SchemaObjectAttribute;
-                            <SchemaDetailObject schemaObjectAttribute="@schemaObjectAttribute"></SchemaDetailObject> 
+                            <SchemaDetailObject schemaObjectAttribute="@schemaObjectAttribute"></SchemaDetailObject>
                         }
                         else if (schemaAttribute.Value.GetType() == typeof(SchemaBooleanAttribute))
                         {
                             var schemaBooleanAttribute = schemaAttribute.Value as SchemaBooleanAttribute;
-                            <SchemaDetailBoolean schemaBooleanAttribute="@schemaBooleanAttribute"></SchemaDetailBoolean> 
+                            <SchemaDetailBoolean schemaBooleanAttribute="@schemaBooleanAttribute"></SchemaDetailBoolean>
                         }
                     }
                 </ChildContent>
             </MudExpansionPanel>
         }
     </MudExpansionPanels>
+    <MudStack Row="true" Class="mt-3">
+        <MudSpacer></MudSpacer>
+        <MudTooltip Text="Not supported in this version">
+            <MudButton Disabled="true" Variant="Variant.Outlined">Clone and edit</MudButton>
+        </MudTooltip>
+    </MudStack>
 </MudPaper>
 
 @code {
@@ -139,7 +145,11 @@
         }
         else if (schemaType == typeof(SchemaObjectAttribute))
         {
-            return "Oject";
+            return "Object";
+        }
+        else if (schemaType == typeof(SchemaBooleanAttribute))
+        {
+            return "Boolean";
         }
         return String.Empty;
     }
