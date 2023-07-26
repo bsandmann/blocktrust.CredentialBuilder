@@ -28,8 +28,12 @@
 
     public void SetAgent(Agent agent)
     {
-        _selectedAgent = agent;
-        this.StateHasChanged();
+        if (agent != _selectedAgent)
+        {
+            _selectedAgent = agent;
+            _selectedSchema = null;
+            this.StateHasChanged();
+        }
     }
 
     public void SetSchema(CredentialSchemaResponse schemaResponse)

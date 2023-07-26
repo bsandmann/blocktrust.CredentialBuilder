@@ -1,0 +1,80 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Models.Schema
+@using Blocktrust.CredentialBuilder.Client.Components.SubComponents.SchemaDetails
+@inject IConnectionService ConnectionService;
+@inject ISnackbar Snackbar
+@inject IAgentService AgentService;
+@inject ICredentialIssuingService CredentialIssuingService;
+
+@if (schemaArrayAttribute.MinItems is not null)
+{
+    <MudStack Row="true">
+        <MudText Typo="Typo.body2" Class="mt-7">
+            <em>Minimum # of items: </em>
+        </MudText>
+        <MudTextField InputType="InputType.Number" Value="schemaArrayAttribute.MinItems" Disabled="true">
+        </MudTextField>
+    </MudStack>
+}
+@if (schemaArrayAttribute.MaxItems is not null)
+{
+    <MudStack Row="true">
+        <MudText Typo="Typo.body2" Class="mt-7">
+            <em>Maximum # of items: </em>
+        </MudText>
+        <MudTextField InputType="InputType.Number" Value="schemaArrayAttribute.MaxItems" Disabled="true">
+        </MudTextField>
+    </MudStack>
+}
+<MudStack Row="true" Class="mt-4">
+    <MudText Typo="Typo.body2" Class="mt-3">
+        <em>Items must be unique: </em>
+    </MudText>
+    @if (@schemaArrayAttribute.Unique is null)
+    {
+        <MudCheckBox Disabled="true" Checked="false"></MudCheckBox>
+    }
+    else
+    {
+        <MudCheckBox Disabled="true" Checked="@schemaArrayAttribute.Unique"></MudCheckBox>
+    }
+</MudStack>
+@if (schemaArrayAttribute.ArrayItemRule is not null)
+{
+    <MudText Typo="Typo.overline">Requirements for items in the array</MudText>
+
+    if (schemaArrayAttribute.ArrayItemRule.GetType() == typeof(SchemaStringAttribute))
+    {
+        var schemaStringAttribute = schemaArrayAttribute.ArrayItemRule as SchemaStringAttribute;
+        <SchemaDetailString schemaStringAttribute="@schemaStringAttribute"></SchemaDetailString>
+    }
+    else if (schemaArrayAttribute.ArrayItemRule.GetType() == typeof(SchemaIntegerAttribute))
+    {
+        var schemaIntegerAttribute = schemaArrayAttribute.ArrayItemRule as SchemaIntegerAttribute;
+        <SchemaDetailInteger schemaIntegerAttribute="@schemaIntegerAttribute"></SchemaDetailInteger>
+    }
+    else if (schemaArrayAttribute.ArrayItemRule.GetType() == typeof(SchemaNumberAttribute))
+    {
+        var schemaNumberAttribute = schemaArrayAttribute.ArrayItemRule as SchemaNumberAttribute;
+        <SchemaDetailNumber schemaNumberAttribute="@schemaNumberAttribute"></SchemaDetailNumber>
+    }
+    else if (schemaArrayAttribute.ArrayItemRule.GetType() == typeof(SchemaObjectAttribute))
+    {
+        var schemaObjectAttribute = schemaArrayAttribute.ArrayItemRule as SchemaObjectAttribute;
+        <SchemaDetailObject schemaObjectAttribute="@schemaObjectAttribute"></SchemaDetailObject>
+    }
+    else if (schemaArrayAttribute.ArrayItemRule.GetType() == typeof(SchemaBooleanAttribute))
+    {
+        var schemaBooleanAttribute = schemaArrayAttribute.ArrayItemRule as SchemaBooleanAttribute;
+        <SchemaDetailBoolean SchemaBooleanAttribute="@schemaBooleanAttribute"></SchemaDetailBoolean>
+    }
+}
+
+
+
+@code{
+
+    [Parameter]
+    public SchemaArrayAttribute schemaArrayAttribute { get; set; }
+
+}

@@ -1,0 +1,31 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Models.Schema
+@inject IConnectionService ConnectionService;
+@inject ISnackbar Snackbar
+@inject IAgentService AgentService;
+@inject ICredentialIssuingService CredentialIssuingService;
+
+
+@if (SchemaBooleanAttribute.DefaultValue is not null)
+{
+    <MudStack Row="true" Class="mt-4">
+        <MudText Typo="Typo.body2" Class="mt-3">
+            <em>Default value: </em>
+        </MudText>
+        @if (@SchemaBooleanAttribute.DefaultValue is null)
+        {
+            <MudCheckBox Disabled="true" Checked="false"></MudCheckBox>
+        }
+        else
+        {
+            <MudCheckBox Disabled="true" Checked="@SchemaBooleanAttribute.DefaultValue"></MudCheckBox>
+        }
+    </MudStack>
+}
+
+@code{
+
+    [Parameter]
+    public SchemaBooleanAttribute SchemaBooleanAttribute { get; set; }
+
+}

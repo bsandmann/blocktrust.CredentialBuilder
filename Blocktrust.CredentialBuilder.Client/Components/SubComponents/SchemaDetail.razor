@@ -1,8 +1,10 @@
 ﻿@using Blocktrust.CredentialBuilder.Client.Models
 @using Blocktrust.CredentialBuilder.Client.Models.Connections
 @using Blocktrust.CredentialBuilder.Client.Components.Helpers
+@using Blocktrust.CredentialBuilder.Client.Components.SubComponents.SchemaDetails
 @using Blocktrust.CredentialBuilder.Client.Services
 @using System.Data.Common
+@using System.Runtime.CompilerServices
 @using Blocktrust.CredentialBuilder.Client.Models.Credentials
 @using Blocktrust.CredentialBuilder.Client.Models.Dids
 @using Blocktrust.CredentialBuilder.Client.Models.Schema
@@ -12,52 +14,107 @@
 @inject IAgentService AgentService;
 @inject ICredentialIssuingService CredentialIssuingService;
 
-<MudPaper Class="mr-2 mt-4 pa-3" Style="width: 916px; height: fit-content;">
+<MudPaper Class="mr-2 pa-3 mt-4" Style="width: 449px; height: fit-content;">
     <MudStack>
         <MudText Typo="Typo.h5">@JsonSchema.Name</MudText>
         <MudText Typo="Typo.body2">@JsonSchema.Description</MudText>
-        <MudText Typo="Typo.caption">Schema Id: @JsonSchema.Id</MudText>
-        <MudText Typo="Typo.caption">Resource Id: @JsonSchema.LongId</MudText>
-        <MudText Typo="Typo.caption">Version: @JsonSchema.Version</MudText>
-        <MudStack Row="true">
-            <MudText Typo="Typo.caption">Tags: </MudText>
-            @foreach (var tag in JsonSchema.Tags)
-            {
-                <MudText Typo="Typo.caption">@tag</MudText>
-            }
-        </MudStack>
-    </MudStack>
-    <MudDivider/>
-    @foreach (var schemaAttribute in JsonSchema.JsonSchemaDefintion.Attributes)
-    {
-        <MudPaper>
-            <MudStack>
-                <MudText Typo="Typo.body2">@schemaAttribute.Key</MudText>
-                @{
-                    if (schemaAttribute.Value.GetType() == typeof(SchemaStringAttribute))
-                    {
-                        <div>is string</div>
-                    }
-                    else if (schemaAttribute.Value.GetType() == typeof(SchemaIntegerAttribute))
-                    {
-                        <div>is integer</div>
-                    }
-                    else if (schemaAttribute.Value.GetType() == typeof(SchemaNumberAttribute))
-                    {
-                        <div>is number</div>
-                    }
-                    else if (schemaAttribute.Value.GetType() == typeof(SchemaArrayAttribute))
-                    {
-                        <div>is array</div>
-                    }
-                    else if (schemaAttribute.Value.GetType() == typeof(SchemaObjectAttribute))
-                    {
-                        <div>is object</div>
-                    }
+        <MudText Typo="Typo.caption">
+            <strong>Schema Id:</strong> @JsonSchema.Id
+        </MudText>
+        <MudText Typo="Typo.caption">
+            <strong>Version:</strong> @JsonSchema.Version
+        </MudText>
+        <MudText Typo="Typo.caption">
+            <strong>Ressource Id:</strong>
+            <span style="word-break: break-all">
+                @JsonSchema.LongId
+            </span>
+        </MudText>
+        @if (@JsonSchema.Tags.Any())
+        {
+            <MudStack Row="true">
+                <MudText Class="mt-1" Typo="Typo.caption">
+                    <strong>Tags:</strong>
+                </MudText>
+                @foreach (var tag in JsonSchema.Tags)
+                {
+                    <MudChip Size="Size.Small">@tag</MudChip>
                 }
             </MudStack>
-        </MudPaper>
-    }
+        }
+    </MudStack>
+    <MudExpansionPanels MultiExpansion="true" Class="mt-5">
+        @foreach (var schemaAttribute in JsonSchema.JsonSchemaDefintion.Attributes)
+        {
+            <MudExpansionPanel>
+                <TitleContent>
+                    <MudStack Row="true">
+                        <MudText Class="mt-3" Typo="Typo.body2">
+                            <strong>@schemaAttribute.Key</strong>
+                        </MudText>
+                        <MudChip>@GetTypeAsString(@schemaAttribute.Value.GetType())</MudChip>
+                    </MudStack>
+                </TitleContent>
+                <ChildContent>
+                    <MudDivider Class="mb-5"></MudDivider>
+                    <MudText Typo="Typo.caption" Class="mb-5">
+                        @schemaAttribute.Value.Description
+                    </MudText>
+                    <MudStack Row="true" Class="mt-4">
+                        <MudText Typo="Typo.body2" Class="mt-3">
+                            <em>Is required: </em>
+                        </MudText>
+                        @if (@schemaAttribute.Value.Required is null)
+                        {
+                            <MudCheckBox Disabled="true" Checked="false"></MudCheckBox>
+                        }
+                        else
+                        {
+                            <MudCheckBox Disabled="true" Checked="@schemaAttribute.Value.Required"></MudCheckBox>
+                        }
+                    </MudStack>
+                    @{
+                        if (schemaAttribute.Value.GetType() == typeof(SchemaStringAttribute))
+                        {
+                            var schemaStringAttribute = schemaAttribute.Value as SchemaStringAttribute;
+                            <SchemaDetailString schemaStringAttribute="@schemaStringAttribute"></SchemaDetailString>
+                        }
+                        else if (schemaAttribute.Value.GetType() == typeof(SchemaIntegerAttribute))
+                        {
+                            var schemaIntegerAttribute = schemaAttribute.Value as SchemaIntegerAttribute;
+                            <SchemaDetailInteger schemaIntegerAttribute="@schemaIntegerAttribute"></SchemaDetailInteger>
+                        }
+                        else if (schemaAttribute.Value.GetType() == typeof(SchemaNumberAttribute))
+                        {
+                            var schemaNumberAttribute = schemaAttribute.Value as SchemaNumberAttribute;
+                            <SchemaDetailNumber schemaNumberAttribute="@schemaNumberAttribute"></SchemaDetailNumber>
+                        }
+                        else if (schemaAttribute.Value.GetType() == typeof(SchemaArrayAttribute))
+                        {
+                            var schemaArrayAttribute = schemaAttribute.Value as SchemaArrayAttribute;
+                            <SchemaDetailArray schemaArrayAttribute="@schemaArrayAttribute"></SchemaDetailArray>
+                        }
+                        else if (schemaAttribute.Value.GetType() == typeof(SchemaObjectAttribute))
+                        {
+                            var schemaObjectAttribute = schemaAttribute.Value as SchemaObjectAttribute;
+                            <SchemaDetailObject schemaObjectAttribute="@schemaObjectAttribute"></SchemaDetailObject>
+                        }
+                        else if (schemaAttribute.Value.GetType() == typeof(SchemaBooleanAttribute))
+                        {
+                            var schemaBooleanAttribute = schemaAttribute.Value as SchemaBooleanAttribute;
+                            <SchemaDetailBoolean schemaBooleanAttribute="@schemaBooleanAttribute"></SchemaDetailBoolean>
+                        }
+                    }
+                </ChildContent>
+            </MudExpansionPanel>
+        }
+    </MudExpansionPanels>
+    <MudStack Row="true" Class="mt-3">
+        <MudSpacer></MudSpacer>
+        <MudTooltip Text="Not supported in this version">
+            <MudButton Disabled="true" Variant="Variant.Outlined">Clone and edit</MudButton>
+        </MudTooltip>
+    </MudStack>
 </MudPaper>
 
 @code {
@@ -67,5 +124,34 @@
 
     [Parameter]
     public JsonSchema JsonSchema { get; set; }
+
+    private string GetTypeAsString(Type schemaType)
+    {
+        if (schemaType == typeof(SchemaStringAttribute))
+        {
+            return "String";
+        }
+        else if (schemaType == typeof(SchemaIntegerAttribute))
+        {
+            return "Integer";
+        }
+        else if (schemaType == typeof(SchemaNumberAttribute))
+        {
+            return "Number";
+        }
+        else if (schemaType == typeof(SchemaArrayAttribute))
+        {
+            return "Array";
+        }
+        else if (schemaType == typeof(SchemaObjectAttribute))
+        {
+            return "Object";
+        }
+        else if (schemaType == typeof(SchemaBooleanAttribute))
+        {
+            return "Boolean";
+        }
+        return String.Empty;
+    }
 
 }

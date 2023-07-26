@@ -6,49 +6,62 @@
 @inject ISchemaService SchemaService
 @inject ISnackbar Snackbar
 
-<MudPaper Class="mr-2 mt-4 pa-3" Style="width: 449px; height: fit-content;">
-    <MudSelect T="Agent" ValueChanged="OnSelectAgentValueChanged" Value="_selectedAgent" ToStringFunc="@_agentConverter" Label="Agent" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" Class="mb-3">
+<MudStack>
+    <MudPaper Class="mr-2 mt-4 pa-3" Style="width: 449px; height: fit-content;">
         @if (AgentService is not null && AgentService.AgentsInMemory is not null && AgentService.AgentsInMemory.List.Any())
         {
-            @foreach (var agent in AgentService.AgentsInMemory.List)
-            {
-                <MudSelectItem Value="agent"></MudSelectItem>
-            }
+            <MudSelect T="Agent" ValueChanged="OnSelectAgentValueChanged" Value="_selectedAgent" ToStringFunc="@_agentConverter" Label="Agent" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" Class="mb-3">
+                @foreach (var agent in AgentService.AgentsInMemory.List)
+                {
+                    <MudSelectItem Value="agent"></MudSelectItem>
+                }
+            </MudSelect>
         }
-    </MudSelect>
-    @if (_selectedAgent is null)
-    {
-        // don't show anything
-    }
-    else if (!availableSchemasInAgent.Any())
-    {
-        <MudAlert Severity="Severity.Info">
-            No schemas available on
-            @if (!string.IsNullOrEmpty(_selectedAgent.AgentName))
-            {
-                <em>@_selectedAgent.AgentName</em>
-            }
-            else
-            {
-                <em>@_selectedAgent.AgentInstanceUri.AbsoluteUri</em>
-            }
-        </MudAlert>
-    }
-    else
-    {
-        <MudList Clickable="true">
-            @foreach (var schema in availableSchemasInAgent)
-            {
-                <MudListItem OnClick="() => OnSelectSchema(schema)">
-                    <MudStack>
-                        <MudText Typo="Typo.body2">@schema.Name</MudText>
-                        <MudText Typo="Typo.caption">@schema.Description</MudText>
-                    </MudStack>
-                </MudListItem>
-            }
-        </MudList>
-    }
-</MudPaper>
+        else
+        {
+            <MudAlert Severity="Severity.Info" Class="mt-3">
+                No agents available. Please add an agent first.
+            </MudAlert>
+        }
+
+        @if (_selectedAgent is null)
+        {
+            // don't show anything
+        }
+        else if (!availableSchemasInAgent.Any())
+        {
+            <MudButton Style="width: 100%" Size="Size.Medium" Disabled="true" Variant="Variant.Outlined">Create new schema</MudButton>
+
+            <MudAlert Severity="Severity.Info" Class="mt-3">
+                No schemas available on
+                @if (!string.IsNullOrEmpty(_selectedAgent.AgentName))
+                {
+                    <em>@_selectedAgent.AgentName</em>
+                }
+                else
+                {
+                    <em>@_selectedAgent.AgentInstanceUri.AbsoluteUri</em>
+                }
+            </MudAlert>
+        }
+        else
+        {
+            <MudButton Style="width: 100%" Size="Size.Medium" Disabled="true" Variant="Variant.Outlined">Create new schema</MudButton>
+
+            <MudList Clickable="true">
+                @foreach (var schema in availableSchemasInAgent)
+                {
+                    <MudListItem OnClick="() => OnSelectSchema(schema)">
+                        <MudStack>
+                            <MudText Typo="Typo.body2">@schema.Name</MudText>
+                            <MudText Typo="Typo.caption">@schema.Description</MudText>
+                        </MudStack>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+    </MudPaper>
+</MudStack>
 
 @code {
     Agent? _selectedAgent = null;
@@ -56,7 +69,7 @@
     Func<Agent, string?> _agentConverter = p => (p.AgentName is not null) ? p.AgentName : p.AgentInstanceUri.AbsoluteUri;
 
     [CascadingParameter]
-    public Schema Parent { get; set; }
+    public Pages.Schema Parent { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
