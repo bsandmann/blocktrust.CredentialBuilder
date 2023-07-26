@@ -1,0 +1,73 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Models.Schema
+@inject IConnectionService ConnectionService;
+@inject ISnackbar Snackbar
+@inject IAgentService AgentService;
+@inject ICredentialIssuingService CredentialIssuingService;
+
+
+<MudStack Row="true" Style="margin-top: -15px">
+    <MudText Typo="Typo.body2" Class="mt-7">
+        <em>String format: </em>
+    </MudText>
+    <MudSelect Value="schemaStringAttribute.Format.ToString()" Disabled="true">
+    </MudSelect>
+</MudStack>
+
+@if (schemaStringAttribute.Pattern is not null)
+{
+    <MudStack Row="true">
+        <MudText Typo="Typo.body2" Class="mt-7">
+            <em>Regex pattern: </em>
+        </MudText>
+        <MudTextField InputType="InputType.Text" Value="schemaStringAttribute.Pattern" Disabled="true">
+        </MudTextField>
+    </MudStack>
+}
+@if (schemaStringAttribute.MinLength is not null)
+{
+    <MudStack Row="true">
+        <MudText Typo="Typo.body2" Class="mt-7">
+            <em>Maximum length: </em>
+        </MudText>
+        <MudTextField InputType="InputType.Number" Value="schemaStringAttribute.MaxLength" Disabled="true">
+        </MudTextField>
+    </MudStack>
+}
+@if (schemaStringAttribute.MaxLength is not null)
+{
+    <MudStack Row="true">
+        <MudText Typo="Typo.body2" Class="mt-7">
+            <em>Minimum length: </em>
+        </MudText>
+        <MudTextField InputType="InputType.Number" Value="schemaStringAttribute.MinLength" Disabled="true">
+        </MudTextField>
+    </MudStack>
+}
+@if (schemaStringAttribute.DefaultValue is not null)
+{
+    <MudStack Row="true">
+        <MudText Typo="Typo.body2" Class="mt-7">
+            <em>Default value: </em>
+        </MudText>
+        <MudTextField InputType="InputType.Text" Value="schemaStringAttribute.DefaultValue" Disabled="true">
+        </MudTextField>
+    </MudStack>
+}
+@if (schemaStringAttribute.Enum is not null && schemaStringAttribute.Enum.Any())
+{
+    <MudStack Row="true" Class="mt-5">
+        <MudText Typo="Typo.body2" Class="mt-1">
+            <em>Possible values: </em>
+        </MudText>
+        @foreach (var enumValue in schemaStringAttribute.Enum)
+        {
+            <MudChip Size="Size.Small">@enumValue</MudChip>
+        }
+    </MudStack>
+}
+
+@code{
+    [Parameter]
+    public SchemaStringAttribute schemaStringAttribute { get; set; }
+}

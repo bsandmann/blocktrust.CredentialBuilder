@@ -1,0 +1,46 @@
+﻿@using Blocktrust.CredentialBuilder.Client.Services
+@using Blocktrust.CredentialBuilder.Client.Models.Schema
+@inject IConnectionService ConnectionService;
+@inject ISnackbar Snackbar
+@inject IAgentService AgentService;
+@inject ICredentialIssuingService CredentialIssuingService;
+
+@if (schemaObjectAttribute.MinProperties is not null)
+{
+    <MudStack Row="true">
+        <MudText Typo="Typo.body2" Class="mt-7">
+            <em>Minimum # of properties: </em>
+        </MudText>
+        <MudTextField InputType="InputType.Number" Value="schemaObjectAttribute.MinProperties" Disabled="true">
+        </MudTextField>
+    </MudStack>
+}
+@if (schemaObjectAttribute.MaxProperties is not null)
+{
+    <MudStack Row="true">
+        <MudText Typo="Typo.body2" Class="mt-7">
+            <em>Maximum # of properties: </em>
+        </MudText>
+        <MudTextField InputType="InputType.Number" Value="schemaObjectAttribute.MaxProperties" Disabled="true">
+        </MudTextField>
+    </MudStack>
+}
+<MudStack Row="true" Class="mt-4">
+    <MudText Typo="Typo.body2" Class="mt-3">
+        <em>Items must be unique: </em>
+    </MudText>
+    @if (@schemaObjectAttribute.AllowAdditionalProperties is null)
+    {
+        <MudCheckBox Disabled="true" Checked="false"></MudCheckBox>
+    }
+    else
+    {
+        <MudCheckBox Disabled="true" Checked="@schemaObjectAttribute.AllowAdditionalProperties"></MudCheckBox>
+    }
+</MudStack>
+
+
+@code{
+    [Parameter]
+    public SchemaObjectAttribute schemaObjectAttribute { get; set; }
+}

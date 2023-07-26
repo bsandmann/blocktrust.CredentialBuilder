@@ -56,7 +56,7 @@
     Func<Agent, string?> _agentConverter = p => (p.AgentName is not null) ? p.AgentName : p.AgentInstanceUri.AbsoluteUri;
 
     [CascadingParameter]
-    public Schema Parent { get; set; }
+    public Pages.Schema Parent { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
