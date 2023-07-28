@@ -31,10 +31,10 @@
                 <MudTooltip Text="Agent is connected">
                     <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Success"></MudIcon>
                 </MudTooltip>
-                <MudTooltip Text="The current version-number">
-                    <MudText Typo="Typo.body2">
+                <MudTooltip Text="The current version-number. Click to download the API specification.">
+                    <MudLink Typo="Typo.body2" Href="@GetApiSpec(@Agent)">
                         <em>@Version</em>
-                    </MudText>
+                    </MudLink>
                 </MudTooltip>
             </MudStack>
         }
@@ -125,6 +125,11 @@
     public void RefreshState()
     {
         this.StateHasChanged();
+    }
+
+    private string GetApiSpec(Agent agent)
+    {
+        return string.Concat(agent.AgentInstanceUri.AbsoluteUri, "/docs/docs.yaml");
     }
 
 }

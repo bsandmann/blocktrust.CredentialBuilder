@@ -21,7 +21,7 @@ public class CredentialIssuingService : ICredentialIssuingService
         {
             var response = await issueCredentialsProtocolApi.CreateCredentialOfferAsync(
                 new CreateIssueCredentialRecordRequest(
-                    //schemaId: preparedCredential.SchemaId,
+                    // schemaId: preparedCredential.SchemaId,
                     validityPeriod: (double)0M,
                     claims: preparedCredential.Claims,
                     automaticIssuance: preparedCredential.AutomaticIssuance,
